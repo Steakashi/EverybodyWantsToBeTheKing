@@ -24,7 +24,5 @@ export class HomeComponent implements OnInit {
     this.lobby.create_room(uuid.v4());
   }
 
-
-
 }
 

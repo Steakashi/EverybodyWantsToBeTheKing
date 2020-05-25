@@ -9,8 +9,13 @@ export class WebsocketService {
 
   // Our socket connection
   private socket;
+  private id;
 
   constructor() { }
+
+  parse_incoming_data(data){
+    return JSON.parse(data);
+  }
 
   connect(): Subject<MessageEvent> {
     // If you aren't familiar with environment variables then
@@ -21,10 +26,11 @@ export class WebsocketService {
     // from our socket.io server.
     const observable = new Observable(observer => {
       this.socket.on('room_creation', (data) => {
-        console.log('Received room creation order.');
+        console.log('Received room creation order on client.');
         console.log(data);
         observer.next(data);
       });
+
       return () => {
         this.socket.disconnect();
       };
@@ -35,7 +41,14 @@ export class WebsocketService {
     // socket server whenever the `next()` method is called.
     const observer = {
       next: (data: Object) => {
-        this.socket.emit('room_creation', JSON.stringify(data));
+        if (!('action' in data)){
+          console.log('ERROR : no actionType found in observer incoming data.');
+        }
+
+        const action = data['action'];
+        if (action === 'room_creation') {
+          this.socket.emit('room_creation', JSON.stringify(data));
+        }
       },
     };
 

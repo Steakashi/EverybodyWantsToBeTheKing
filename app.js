@@ -1,19 +1,48 @@
 let app = require("express")();
 let http = require("http").Server(app);
 let io = require("socket.io")(http);
+const { v4: uuidv4 } = require('uuid');
+
+
+var rooms = {}
+
+
+function parse_incoming_data(data){
+  return JSON.parse(data);
+}
+
 
 io.on("connection", socket => {
-  // Log whenever a user connects
-  console.log("user connected");
+  console.log("User connected")
 
-  socket.on("room_creation", room_id => {
-    console.log("Room creation order received: " + room_id);
+  socket.on("connexion", data => {
+    data = parse_incoming_data(data)
+    console.log("User connected with id : " + data.user_id);
+  });
+
+  socket.on("disconnect", function() {
+    console.log("user disconnected");
+
+    io.emit("user_disconnection", {
+      action: "user_disconnection"
+    });
+  });
+
+  socket.on("room_creation", data => {
+    data = parse_incoming_data(data)
+    console.log("Room creation order received : " + data.room_id);
+    rooms[data.room_id] = [data.user_id];
+
+    console.log(rooms);
+
     io.emit("room_creation", {
       action: "room_creation",
-      room_id: room_id
+      room_id: data.room_id,
+      users: [data.user_id]
     });
   });
 });
+
 
 // Initialize our websocket server on port 5000
 http.listen(5000, () => {
