@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { LobbyService } from '../services/lobby.service';
 import * as uuid from 'uuid';
+import {WebsocketService} from '../services/websocket.service';
 
 
 @Component({
@@ -10,18 +11,15 @@ import * as uuid from 'uuid';
 })
 
 export class HomeComponent implements OnInit {
-  users = [];
 
   constructor(private lobby: LobbyService){ }
 
   ngOnInit() {
-    this.lobby.rooms.subscribe(id => {
-      this.users.push(id);
-    });
+    this.lobby.connect_user();
   }
 
   create_room() {
-    this.lobby.create_room(uuid.v4());
+    this.lobby.create_room();
   }
 
 }

@@ -15,27 +15,25 @@ function parse_incoming_data(data){
 io.on("connection", socket => {
   console.log("User connected")
 
-  socket.on("connexion", data => {
-    data = parse_incoming_data(data)
+  socket.on("user_connexion", data => {
     console.log("User connected with id : " + data.user_id);
   });
 
   socket.on("disconnect", function() {
     console.log("user disconnected");
 
-    io.emit("user_disconnection", {
+    socket.emit("user_disconnection", {
       action: "user_disconnection"
     });
   });
 
   socket.on("room_creation", data => {
-    data = parse_incoming_data(data)
-    console.log("Room creation order received : " + data.room_id);
+    console.log("Room creation order received on server : " + data.room_id);
     rooms[data.room_id] = [data.user_id];
 
     console.log(rooms);
 
-    io.emit("room_creation", {
+    socket.emit("room_creation", {
       action: "room_creation",
       room_id: data.room_id,
       users: [data.user_id]

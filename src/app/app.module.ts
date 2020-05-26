@@ -5,6 +5,7 @@ import { AppComponent } from './app.component';
 
 import { WebsocketService } from './services/websocket.service';
 import { HomeComponent } from './home/home.component';
+import { LobbyService } from './services/lobby.service';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,8 @@ import { HomeComponent } from './home/home.component';
     BrowserModule
   ],
   providers: [
-    WebsocketService
+    WebsocketService,
+    LobbyService
   ],
   bootstrap: [AppComponent]
 })
