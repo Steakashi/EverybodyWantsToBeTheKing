@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { WebsocketService } from './services/websocket.service';
 import { HomeComponent } from './home/home.component';
 import { LobbyService } from './services/lobby.service';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -13,7 +14,8 @@ import { LobbyService } from './services/lobby.service';
     HomeComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    FormsModule
   ],
   providers: [
     WebsocketService,

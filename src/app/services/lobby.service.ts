@@ -4,26 +4,41 @@ import { Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import * as uuid from 'uuid';
 
+
 @Injectable()
 export class LobbyService{
   // rooms: Subject<any>;
   userID: null;
+  userName: null;
   roomID: null;
+  roomName: null;
 
   constructor(private wsService: WebsocketService) {
     this.userID = uuid.v4();
   }
 
-  create_room() {
-    this.roomID = uuid.v4();
+  emit_room_order_creation(userName, roomName) {
     this.wsService.emit(
       'room_creation',
       {
         action: 'room_creation',
-        room_id: this.roomID,
-        user_id: this.userID
+        user_id: this.userID,
+        user_name: userName,
+        room_id: uuid.v4(),
+        room_name: roomName,
       }
     );
+  }
+
+  create_room(roomName, roomID){
+    console.log('create room');
+    this.roomName = roomName;
+    this.roomID = roomID;
+  }
+
+  get_current_room_name(){
+    console.log('return name : ' + this.roomName)
+    return this.roomName;
   }
 
   connect_user(){

@@ -32,11 +32,13 @@ io.on("connection", socket => {
     rooms[data.room_id] = [data.user_id];
 
     console.log(rooms);
-
+    console.log(data);
+    console.log(data.room_name);
     socket.emit("room_creation", {
       action: "room_creation",
       room_id: data.room_id,
-      users: [data.user_id]
+      room_name: data.room_name,
+      users: [data.user_id],
     });
   });
 });

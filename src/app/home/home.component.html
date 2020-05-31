@@ -1,1 +1,27 @@
-<button (click)="create_room()">Create room</button>
+<p *ngIf="get_room() != null">{{get_room()}}</p>
+<form (ngSubmit)="create_room(f)" #f="ngForm">
+  <div class="form-group">
+
+    <label for="payer_name">Nom du joueur</label><br />
+    <div class="form-inline">
+      <input #user_name type="text" id="payer_name" name="payer_name" class="form-control" ngModel required>
+      <button (click)="user_name.value=''" type="button" class="btn">Suppr</button>
+    </div>
+
+    <label for="room_name">Nom de la salle</label>
+    <div class="form-inline">
+      <input #room_name type="text" id="room_name" name="room_name" class="form-control" ngModel required>
+      <button (click)="room_name.value=''" type="button" class="btn">Suppr</button>
+    </div>
+
+    <label for="room_id">ID de la salle</label>
+    <div class="form-inline">
+      <input #room_id type="text" id="room_id" name="room_id" class="form-control" placeholder="Laisser vide pour créer une nouvelle salle" ngModel>
+      <button (click)="room_id.value=''" type="button" class="btn">Suppr</button>
+    </div>
+
+    <button class="btn btn-primary" type="submit" [disabled]="f.invalid" [value]="">{{ f.value['room_id'] === '' ? 'Créer une salle' : 'Rejoindre une salle' }}</button>
+  </div>
+</form>
+
+ <!--(click)="create_room()"-->

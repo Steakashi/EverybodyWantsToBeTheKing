@@ -11,12 +11,15 @@ import {WebsocketService} from './services/websocket.service';
 export class AppComponent implements OnInit{
   title = 'EverybodyWantsToBeTheKing';
 
-  constructor(private wsService: WebsocketService) {}
+  constructor(private wsService: WebsocketService,
+              private lobby: LobbyService) {}
 
   ngOnInit() {
     this.wsService.listen('room_creation').subscribe((data) => {
+      // @ts-ignore
       console.log('Room creation order received on client with id : ' + data.room_id);
-      console.log(data);
+      // @ts-ignore
+      this.lobby.create_room(data.room_name, data.room_id);
     });
     console.log('Lobby Service initialized');
   }
