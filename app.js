@@ -7,9 +7,6 @@ const { v4: uuidv4 } = require('uuid');
 var rooms = {}
 
 
-
-
-
 function parse_incoming_data(data){
   return JSON.parse(data);
 }
@@ -59,8 +56,9 @@ io.on("connection", socket => {
       'user_id': data.user_id,
       'user_name': data.user_name
     }]
+    socket.join(data.room_id);
 
-    io.emit("room_creation", {
+    io.to(data.room_id).emit("room_creation", {
       action: "room_creation",
       room_id: data.room_id,
       room_name: data.room_name,
@@ -78,7 +76,8 @@ io.on("connection", socket => {
         'user_name': data.user_name
       })
 
-      io.emit("room_connexion", {
+    socket.join(data.room_id);
+    io.to(data.room_id).emit("room_connexion", {
         action: "room_connexion",
         room_id: data.room_id,
         user_id: data.user_id,
