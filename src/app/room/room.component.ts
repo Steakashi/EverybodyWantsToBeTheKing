@@ -65,7 +65,7 @@ export class RoomComponent implements OnInit {
   }
 
   get_room_users() {
-    return this.lobby.users.map(t => t.user_name);
+    return this.lobby.users;//.map(t => t.user_name);
   }
 
 }

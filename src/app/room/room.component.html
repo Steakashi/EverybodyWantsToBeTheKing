@@ -7,7 +7,7 @@
   <p *ngIf="!get_room_users()">Aucun autre joueur dans la salle.</p>
 
   <ul *ngIf="get_room_users()">
-    <li *ngFor="let user of get_room_users()">{{ user }}</li>
+    <li *ngFor="let user of get_room_users()">{{ user.user_name }} ({{ user.user_id }})</li>
   </ul>
 </div>
 <div *ngIf="get_lobby_state()=='ERROR'">
