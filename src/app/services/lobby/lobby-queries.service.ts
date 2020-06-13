@@ -14,9 +14,7 @@ export class LobbyQueriesService{
   state = 'DISCONNECTED';
 
   constructor(private wsService: WebsocketService,
-              private router: Router) {
-    this.userID = uuid.v4();
-  }
+              private router: Router) {}
 
   begin_connexion(){
     this.state = 'WAITING';
@@ -83,7 +81,7 @@ export class LobbyQueriesService{
     console.log('return name : ' + this.roomName);
     return this.roomName;
   }
-
+  /*
   connect_user(){
     this.wsService.emit(
       'user_connexion',
@@ -93,6 +91,10 @@ export class LobbyQueriesService{
         user_id: this.userID,
       }
     );
+  }*/
+
+  connect_user(user_id){
+    this.userID = user_id
   }
 
   disconnect_user(){

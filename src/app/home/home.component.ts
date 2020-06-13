@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { LobbyQueriesService } from '../services/lobby/lobby-queries.service';
 import * as uuid from 'uuid';
 import {WebsocketService} from '../services/websocket.service';
@@ -11,14 +11,11 @@ import {NgForm} from '@angular/forms';
   styleUrls: ['./home.component.scss']
 })
 
-export class HomeComponent implements OnInit {
+export class HomeComponent {
 
   constructor(private lobby: LobbyQueriesService,
               private wsService: WebsocketService){ }
 
-  ngOnInit() {
-    this.lobby.connect_user();
-  }
 
   send_form(form: NgForm){
     if (form.value.room_id === ''){ this.create_room(form.value.user_name, form.value.room_name); }

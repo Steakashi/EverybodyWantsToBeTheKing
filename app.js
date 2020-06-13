@@ -13,11 +13,8 @@ function parse_incoming_data(data){
 
 
 io.on("connection", socket => {
-  console.log("User connected")
-
-  socket.on("user_connexion", data => {
-    console.log("User connected with id : " + data.user_id);
-  });
+  console.log("User connected with id " + socket.id);
+  socket.emit("user_connexion", { user_id: socket.id });
 
   socket.on("disconnect", function() {
     console.log("user disconnected");
@@ -41,7 +38,6 @@ io.on("connection", socket => {
       }
 
       io.emit("user_disconnection", {
-        action: "user_disconnection",
         room_id: data.room_id,
         user_id: data.user_id,
         users: rooms[data.room_id]
@@ -59,7 +55,6 @@ io.on("connection", socket => {
     socket.join(data.room_id);
 
     io.to(data.room_id).emit("room_creation", {
-      action: "room_creation",
       room_id: data.room_id,
       room_name: data.room_name,
       user_id: data.user_id,
@@ -77,8 +72,8 @@ io.on("connection", socket => {
       })
 
     socket.join(data.room_id);
+
     io.to(data.room_id).emit("room_connexion", {
-        action: "room_connexion",
         room_id: data.room_id,
         user_id: data.user_id,
         user_name: data.user_name,
