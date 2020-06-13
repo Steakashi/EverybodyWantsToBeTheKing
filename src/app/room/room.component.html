@@ -1,0 +1,15 @@
+<img *ngIf="get_lobby_state()=='WAITING'" src="../../assets/loading.gif" />
+
+<div *ngIf="get_lobby_state()=='CONNECTED'">
+  <h2>Bienvenue dans la salle : {{ get_room_name() }}</h2>
+  <h3>Vous êtes {{ get_player_name() }} (félicitations, c'est un très joli nom !)</h3>
+
+  <p *ngIf="!get_room_users()">Aucun autre joueur dans la salle.</p>
+
+  <ul *ngIf="get_room_users()">
+    <li *ngFor="let user of get_room_users()">{{ user }}</li>
+  </ul>
+</div>
+<div *ngIf="get_lobby_state()=='ERROR'">
+  <p>Aucune salle trouvée avec cette ID. Quelqu'un semble s'être joué de vous...</p>
+</div>

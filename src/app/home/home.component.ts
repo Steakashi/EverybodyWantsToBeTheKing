@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { LobbyService } from '../services/lobby.service';
+import { LobbyQueriesService } from '../services/lobby/lobby-queries.service';
 import * as uuid from 'uuid';
 import {WebsocketService} from '../services/websocket.service';
 import {NgForm} from '@angular/forms';
@@ -13,14 +13,24 @@ import {NgForm} from '@angular/forms';
 
 export class HomeComponent implements OnInit {
 
-  constructor(private lobby: LobbyService){ }
+  constructor(private lobby: LobbyQueriesService,
+              private wsService: WebsocketService){ }
 
   ngOnInit() {
     this.lobby.connect_user();
   }
 
-  create_room(form: NgForm) {
-    this.lobby.emit_room_order_creation(form.value['user_name'], form.value['room_name']);
+  send_form(form: NgForm){
+    if (form.value.room_id === ''){ this.create_room(form.value.user_name, form.value.room_name); }
+    else { this.join_room(form.value.user_name, form.value.room_id);  }
+  }
+
+  create_room(userName, roomName) {
+    this.lobby.emit_room_order_creation(userName, roomName);
+  }
+
+  join_room(userName, roomID){
+    this.lobby.emit_room_order_connexion(userName, roomID);
   }
 
   get_room(){

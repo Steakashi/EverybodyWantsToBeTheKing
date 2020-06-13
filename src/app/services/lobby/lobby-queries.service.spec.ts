@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { LobbyService } from './lobby.service';
+import { LobbyQueriesService } from './lobby-queries.service';
 
 describe('LobbyService', () => {
-  let service: LobbyService;
+  let service: LobbyQueriesService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(LobbyService);
+    service = TestBed.inject(LobbyQueriesService);
   });
 
   it('should be created', () => {

@@ -1,16 +1,16 @@
 <p *ngIf="get_room() != null">{{get_room()}}</p>
-<form (ngSubmit)="create_room(f)" #f="ngForm">
+<form (ngSubmit)="send_form(f)" #f="ngForm">
   <div class="form-group">
 
-    <label for="payer_name">Nom du joueur</label><br />
+    <label for="user_name">Nom du joueur</label><br />
     <div class="form-inline">
-      <input #user_name type="text" id="payer_name" name="payer_name" class="form-control" ngModel required>
+      <input #user_name type="text" id="user_name" name="user_name" class="form-control" ngModel required>
       <button (click)="user_name.value=''" type="button" class="btn">Suppr</button>
     </div>
 
     <label for="room_name">Nom de la salle</label>
     <div class="form-inline">
-      <input #room_name type="text" id="room_name" name="room_name" class="form-control" ngModel required>
+      <input #room_name type="text" id="room_name" name="room_name" class="form-control" ngModel>
       <button (click)="room_name.value=''" type="button" class="btn">Suppr</button>
     </div>
 
