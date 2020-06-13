@@ -73,7 +73,6 @@ export class LobbyQueriesService{
   join_room(roomID, userID, userName, users){
     this.roomID = roomID;
     this.userName = userName;
-    this.update_users(users);
     this.router.navigate(['room/' + this.roomID]).then(() => { this.validate_connexion(); });
   }
 

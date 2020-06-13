@@ -104,14 +104,15 @@ io.on("connection", socket => {
       })
 
       users[socket.id] = data.room_id;
-    socket.join(data.room_id);
+      socket.join(data.room_id);
 
-    io.to(data.room_id).emit("room_connexion", {
+      socket.emit("room_connexion", {
         room_id: data.room_id,
         user_id: socket.id,
-        user_name: data.user_name,
-        users: rooms[data.room_id]
+        user_name: data.user_name
       });
+
+      io.to(data.room_id).emit("update_users", { users: rooms[data.room_id] });
     }
 
     else {
