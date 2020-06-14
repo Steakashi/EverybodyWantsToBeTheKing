@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 
 var rooms = {}
 var users = {}
+var sockets = {}
 
 
 function parse_incoming_data(data){
@@ -14,21 +15,30 @@ function parse_incoming_data(data){
 
 
 io.on("connection", socket => {
-  console.log("User connected with id " + socket.id);
-  socket.emit("user_connexion", { user_id: socket.id });
+  console.log("User connected on socket " + socket.id);
+  socket.emit("user_connexion");
+
+  socket.on('user_connexion', data => {
+    sockets[socket.id] = data.user_id;
+  });
 
   socket.on("disconnect", function() {
-    console.log("User with id" + socket.id +  " disconnected");
+
+    user_id = sockets[socket.id]
+    console.log("User with id " + user_id +  " disconnected");
 
     //socket.emit("disconnection_order", { user_id: socket.id });
+    console.log('// ROOMS')
     console.log(rooms)
-    user_id = socket.id
 
+    console.log('// USERS')
     if (user_id in users){
       room_id = users[user_id]
 
+      console.log('// ROOM ID')
+      console.log(room_id)
       rooms[room_id].forEach(element => {
-        if (element['user_id'] === socket.id) {
+        if (element['user_id'] === user_id) {
           rooms[room_id].splice(rooms[room_id].indexOf(element), 1);
         }
       })
@@ -47,9 +57,7 @@ io.on("connection", socket => {
     console.log('-')
     console.log(room_id)
     console.log(rooms[room_id])
-    if (rooms[room_id].length <= 0) {
-      rooms.splice(rooms.indexOf(room_id), 1);
-    }
+    if (rooms[room_id] === undefined) { delete rooms[room_id]; }
    
   });
   /*
@@ -80,35 +88,35 @@ io.on("connection", socket => {
   socket.on("room_creation", data => {
     console.log("Room creation order received on server : " + data.room_id);
     rooms[data.room_id] = [{
-      'user_id': socket.id,
+      'user_id': data.user_id,
       'user_name': data.user_name
     }];
-    users[socket.id] = data.room_id;
+    users[data.user_id] = data.room_id;
     socket.join(data.room_id);
 
     io.to(data.room_id).emit("room_creation", {
       room_id: data.room_id,
       room_name: data.room_name,
-      user_id: socket.id,
+      user_id: data.user_id,
       user_name: data.user_name
     });
   });
 
   socket.on("room_connexion", data => {
-    console.log("Room connexion order received on server : " + data.room_id + " from user : " + socket.id);
+    console.log("Room connexion order received on server : " + data.room_id + " from user : " + data.user_id);
 
     if (data.room_id in rooms){
       rooms[data.room_id].push({
-        'user_id': socket.id,
+        'user_id': data.user_id,
         'user_name': data.user_name
       })
 
-      users[socket.id] = data.room_id;
+      users[data.user_id] = data.room_id;
       socket.join(data.room_id);
 
       socket.emit("room_connexion", {
         room_id: data.room_id,
-        user_id: socket.id,
+        user_id: data.user_id,
         user_name: data.user_name
       });
 

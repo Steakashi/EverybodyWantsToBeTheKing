@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { CookieService } from 'ngx-cookie-service'
 
 import { AppComponent } from './app.component';
 
@@ -35,7 +36,8 @@ const appRoutes: Routes = [
   providers: [
     WebsocketService,
     LobbyQueriesService,
-    LobbyResponsesService
+    LobbyResponsesService,
+    CookieService
   ],
   bootstrap: [AppComponent]
 })

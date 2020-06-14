@@ -2,19 +2,27 @@ import {Injectable} from '@angular/core';
 import { WebsocketService } from '../websocket.service';
 import * as uuid from 'uuid';
 import { Router } from '@angular/router';
+import { CookieService } from 'ngx-cookie-service'
 
 
 @Injectable()
 export class LobbyQueriesService{
-  userID: null;
-  userName: null;
-  roomID: null;
-  roomName: null;
+  title: string;
+  socketID: string;
+  userID: string;
+  userName: string;
+  roomID: string;
+  roomName: string;
   users = [];
   state = 'DISCONNECTED';
 
   constructor(private wsService: WebsocketService,
-              private router: Router) {}
+              private router: Router,
+              private cookie: CookieService) {}
+
+  set_title(title){
+    this.title = title;
+  }
 
   begin_connexion(){
     this.state = 'WAITING';
@@ -92,8 +100,28 @@ export class LobbyQueriesService{
     );
   }*/
 
-  connect_user(user_id){
-    this.userID = user_id
+  connect_user(){
+    const retrieved_id = this.cookie.get(this.title)
+    if ((retrieved_id === '') || (retrieved_id === undefined) || (retrieved_id === null)){
+      this.userID = uuid.v4()
+      this.cookie.set(this.title, this.userID);
+    }
+    else{
+      this.userID = retrieved_id;
+    }
+    console.log('--')
+    console.log(retrieved_id);
+    console.log(this.userID);
+
+    return this.userID
+    //this.cookie.delete(this.title);
+    //this.userID = uuid.v4()
+    //this.cookie.set(this.title, 'test cookie');
+    //console.log(this.cookie.get(this.title));
+  }
+
+  get_user_id(){
+    return this.userID;
   }
 
   disconnect_user(){
