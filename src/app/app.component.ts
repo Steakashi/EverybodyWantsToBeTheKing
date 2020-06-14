@@ -30,6 +30,10 @@ export class AppComponent implements OnInit{
       });
     });
 
+    this.wsService.listen('user_duplicated').subscribe((data) => {
+      this.lobby.block_connection();
+    });
+
     this.wsService.listen('user_disconnection').subscribe((data) => {
      // @ts-ignore
      console.log('Disconnecting user ' + data.user_id + ' from application');

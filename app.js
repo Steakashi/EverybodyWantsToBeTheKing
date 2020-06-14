@@ -19,7 +19,16 @@ io.on("connection", socket => {
   socket.emit("user_connexion");
 
   socket.on('user_connexion', data => {
-    sockets[socket.id] = data.user_id;
+    console.log(data.user_id);
+    console.log(users);
+    if (data.user_id in users){
+      console.log("Warning : multiple connection from single user detected");
+      socket.emit('user_duplicated');
+    }
+    else{
+      users[data.user_id] = null;
+      sockets[socket.id] = data.user_id;
+    }
   });
 
   socket.on("disconnect", function() {

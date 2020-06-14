@@ -120,6 +120,11 @@ export class LobbyQueriesService{
     //console.log(this.cookie.get(this.title));
   }
 
+  block_connection(){
+    console.log('connection_blocked');
+    this.router.navigate(['home']);
+  }
+
   get_user_id(){
     return this.userID;
   }
