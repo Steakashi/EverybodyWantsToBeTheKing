@@ -1,4 +1,5 @@
 import {Injectable} from '@angular/core';
+import { ToastrService  } from 'ngx-toastr';
 import { WebsocketService } from '../websocket.service';
 import * as uuid from 'uuid';
 import { Router } from '@angular/router';
@@ -16,7 +17,8 @@ export class LobbyQueriesService{
   users = [];
   state = 'DISCONNECTED';
 
-  constructor(private wsService: WebsocketService,
+  constructor(private toastr: ToastrService,
+              private wsService: WebsocketService,
               private router: Router,
               private cookie: CookieService) {}
 
@@ -30,10 +32,12 @@ export class LobbyQueriesService{
 
   validate_connexion(){
     this.state = 'CONNECTED';
+    this.toastr.success("Connection successfull !")
   }
 
   invalidate_connexion(){
     this.state = 'ERROR';
+    this.toastr.success("Connection has failed !")
   }
 
   update_users(users){

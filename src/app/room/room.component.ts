@@ -46,7 +46,7 @@ export class RoomComponent implements OnInit {
       );
     }
     else {
-      this.lobby.validate_connexion();
+      //this.lobby.validate_connexion();
     }
 
   }

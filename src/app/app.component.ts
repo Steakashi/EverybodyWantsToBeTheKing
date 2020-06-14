@@ -74,7 +74,7 @@ export class AppComponent implements OnInit{
 
    this.lobby.set_title(this.title);
    this.lobby.connect_user();
-    console.log('Lobby Service initialized');
+   console.log('Lobby Service initialized');
 
   }
 }
