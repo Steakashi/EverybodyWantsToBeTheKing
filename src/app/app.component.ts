@@ -25,9 +25,6 @@ export class AppComponent implements OnInit{
       //console.log('User from socket ' + data.socket_id + ' is connected');
       // @ts-ignore
       //var retrieved_user_id = this.lobby.connect_user(data);
-      this.wsService.emit('user_connexion', {
-        user_id: this.lobby.get_user_id()
-      });
     });
 
     this.wsService.listen('user_duplicated').subscribe((data) => {
@@ -71,10 +68,14 @@ export class AppComponent implements OnInit{
       this.lobby.disconnect_user();
    });
 
-
+  
    this.lobby.set_title(this.title);
    this.lobby.connect_user();
    console.log('Lobby Service initialized');
+
+   this.wsService.emit('user_connexion', {
+     user_id: this.lobby.get_user_id()
+   });
 
   }
 }
