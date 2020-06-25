@@ -19,16 +19,18 @@ export class AppComponent implements OnInit{
               private response: LobbyResponsesService) {}
 
   ngOnInit() {
-    this.wsService.listen('user_connexion').subscribe((data) => {
+    this.wsService.listen('user_connection').subscribe((data) => {
       console.log(data)
-      // @ts-ignore
-      //console.log('User from socket ' + data.socket_id + ' is connected');
-      // @ts-ignore
-      //var retrieved_user_id = this.lobby.connect_user(data);
+
+      // TODO : connect user if not already connected to app
     });
 
     this.wsService.listen('user_duplicated').subscribe((data) => {
       this.lobby.block_connection();
+    });
+    this.wsService.listen('confirm_user_connection').subscribe((data) => {
+      console.log('user connexion confirmed')
+      this.lobby.confirm_connection();
     });
 
     this.wsService.listen('user_disconnection').subscribe((data) => {
@@ -40,7 +42,7 @@ export class AppComponent implements OnInit{
 
     this.wsService.listen('update_users').subscribe((data) => {
      // @ts-ignore
-     console.log("Update connected users : " + data.users);
+     console.log('Update connected users : ' + data.users);
      // @ts-ignore
      this.lobby.update_users(data.users);
     });
@@ -54,9 +56,9 @@ export class AppComponent implements OnInit{
       this.lobby.create_room(data.room_name, data.room_id, data.user_name, data.user_id);
    });
 
-   this.wsService.listen('room_connexion').subscribe((data) => {
+   this.wsService.listen('room_connection').subscribe((data) => {
       // @ts-ignore
-      console.log('Room connexion order received on client with id : ' + data.room_id);
+      console.log('Room connection order received on client with id : ' + data.room_id);
       // @ts-ignore
       this.lobby.join_room(data.room_id, data.user_id, data.user_name, data.users);
    });
@@ -68,12 +70,12 @@ export class AppComponent implements OnInit{
       this.lobby.disconnect_user();
    });
 
-  
+
    this.lobby.set_title(this.title);
    this.lobby.connect_user();
    console.log('Lobby Service initialized');
 
-   this.wsService.emit('user_connexion', {
+   this.wsService.emit('user_connection', {
      user_id: this.lobby.get_user_id()
    });
 

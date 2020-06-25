@@ -3,7 +3,16 @@ import { ToastrService  } from 'ngx-toastr';
 import { WebsocketService } from '../websocket.service';
 import * as uuid from 'uuid';
 import { Router } from '@angular/router';
-import { CookieService } from 'ngx-cookie-service'
+import { CookieService } from 'ngx-cookie-service';
+
+
+const PENDING = 'PENDING';
+const PROCESSING = 'PROCESSING';
+const CONNECTED = 'CONNECTED';
+const DISCONNECTED = 'DISCONNECTED';
+const BLOCKED = 'BLOCKED';
+const ERROR = 'ERROR';
+
 
 
 @Injectable()
@@ -15,7 +24,7 @@ export class LobbyQueriesService{
   roomID: string;
   roomName: string;
   users = [];
-  state = 'DISCONNECTED';
+  state: string = null;
 
   constructor(private toastr: ToastrService,
               private wsService: WebsocketService,
@@ -26,18 +35,45 @@ export class LobbyQueriesService{
     this.title = title;
   }
 
-  begin_connexion(){
-    this.state = 'WAITING';
+  connection_is_allowed(){
+    console.log('STATE : ' + this.state);
+    if (this.state === BLOCKED){ return false; }
+    else {
+      this.state = PROCESSING;
+      return true;
+    }
   }
 
-  validate_connexion(){
-    this.state = 'CONNECTED';
-    this.toastr.success("Connection successfull !")
+  is_waiting_order(){
+    console.log('STATE ORDER : ' + this.state);
+    return this.state === PENDING;
   }
 
-  invalidate_connexion(){
-    this.state = 'ERROR';
-    this.toastr.success("Connection has failed !")
+  block_connection(){
+    console.log('connection_blocked');
+    this.state = BLOCKED;
+    this.toastr.error('Connection refused : user already connected to the application.');
+  }
+
+  confirm_connection(){
+    console.log('CONFIRM CONNECTION');
+    console.log(this.state);
+    if (this.state === null){
+      console.log('###########" YES ! CONNECTING WELL ###########"');
+    }
+    else{
+      this.state = PENDING;
+    }
+  }
+
+  validate_connection(){
+    this.state = CONNECTED;
+    this.toastr.success('Connection successfull !');
+  }
+
+  invalidate_connection(){
+    this.state = ERROR;
+    this.toastr.error('Connection has failed !');
   }
 
   update_users(users){
@@ -45,7 +81,7 @@ export class LobbyQueriesService{
   }
 
   emit_room_order_creation(userName, roomName) {
-    this.begin_connexion();
+    if (!this.connection_is_allowed()){ return; }
     this.wsService.emit(
       'room_creation',
       {
@@ -58,17 +94,24 @@ export class LobbyQueriesService{
     );
   }
 
-  emit_room_order_connexion(userName, roomID){
-    this.begin_connexion();
+  emit_room_order_connection(userName, roomID){
+    if (!this.connection_is_allowed()){ return; }
     this.wsService.emit(
-      'room_connexion',
+      'room_connection',
       {
-        action: 'room_connexion',
+        action: 'room_connection',
         user_id: this.userID,
         user_name: userName,
         room_id: roomID,
       }
     );
+  }
+
+  navigate_to_lobby(userName, roomID){
+    //if (!this.connection_is_allowed()){ return; }
+    this.roomID = roomID;
+    this.userName = userName;
+    this.router.navigate(['room/' + this.roomID]);
   }
 
   create_room(roomName, roomID, userName, userID){
@@ -79,13 +122,11 @@ export class LobbyQueriesService{
       user_name: this.userName,
       user_id: this.userID
     });
-    this.router.navigate(['room/' + this.roomID]).then(() => { this.validate_connexion(); });
+    this.router.navigate(['room/' + this.roomID]).then(() => { this.validate_connection(); });
   }
 
   join_room(roomID, userID, userName, users){
-    this.roomID = roomID;
-    this.userName = userName;
-    this.router.navigate(['room/' + this.roomID]).then(() => { this.validate_connexion(); });
+    this.validate_connection();
   }
 
   get_current_room_name(){
@@ -105,28 +146,23 @@ export class LobbyQueriesService{
   }*/
 
   connect_user(){
-    const retrieved_id = this.cookie.get(this.title)
+    const retrieved_id = this.cookie.get(this.title);
     if ((retrieved_id === '') || (retrieved_id === undefined) || (retrieved_id === null)){
-      this.userID = uuid.v4()
+      this.userID = uuid.v4();
       this.cookie.set(this.title, this.userID);
     }
     else{
       this.userID = retrieved_id;
     }
-    console.log('--')
+    console.log('--');
     console.log(retrieved_id);
     console.log(this.userID);
 
-    return this.userID
-    //this.cookie.delete(this.title);
-    //this.userID = uuid.v4()
-    //this.cookie.set(this.title, 'test cookie');
-    //console.log(this.cookie.get(this.title));
-  }
-
-  block_connection(){
-    console.log('connection_blocked');
-    this.router.navigate(['home']);
+    return this.userID;
+    // this.cookie.delete(this.title);
+    // this.userID = uuid.v4()
+    // this.cookie.set(this.title, 'test cookie');
+    // console.log(this.cookie.get(this.title));
   }
 
   get_user_id(){

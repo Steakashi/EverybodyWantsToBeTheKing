@@ -6,6 +6,7 @@ import { ToastrModule } from 'ngx-toastr';
 
 import { AppComponent } from './app.component';
 
+import { AuthGuardService } from './services/auth-guard.service';
 import { WebsocketService } from './services/websocket.service';
 import { HomeComponent } from './home/home.component';
 import { LobbyQueriesService } from './services/lobby/lobby-queries.service';
@@ -17,8 +18,8 @@ import { RoomComponent } from './room/room.component';
 
 const appRoutes: Routes = [
   { path: 'home', component: HomeComponent },
-  { path: 'room', component: RoomComponent },
-  { path: 'room/:id', component: RoomComponent },
+  { path: 'room', canActivate: [AuthGuardService], component: RoomComponent },
+  { path: 'room/:id', canActivate: [AuthGuardService], component: RoomComponent },
   { path: '', component: HomeComponent },
   { path: 'not-found', component: HomeComponent },
   { path: '**', redirectTo: 'not-found' }
@@ -38,6 +39,7 @@ const appRoutes: Routes = [
 	  ToastrModule.forRoot()
   ],
   providers: [
+    AuthGuardService,
     WebsocketService,
     LobbyQueriesService,
     LobbyResponsesService,
