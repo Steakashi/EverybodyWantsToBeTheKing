@@ -13,7 +13,6 @@ import {WebsocketService} from '../services/websocket.service';
   styleUrls: ['./room.component.scss'],
 })
 export class RoomComponent implements OnInit {
-  currentRoomID = null;
   currentUserName = 'Player';
   subscription: Subscription;
 
@@ -30,21 +29,18 @@ export class RoomComponent implements OnInit {
       this.lobby.invalidate_connection();
     });
 
-    this.route.queryParams.subscribe(params => {
-      this.currentRoomID = params.id;
-    });
+    // this.route.queryParams.subscribe(params => {
+    //   console.log(params)
+    //   console.log(params.id)
+    //   this.lobby.set_room_id_from_url(params.id);
+    // });
+    
+    this.lobby.set_room_id_from_url(this.route.snapshot.params.id);
 
     if (this.lobby.is_waiting_order()){
-      this.emit_room_order_connection();
+      this.lobby.emit_room_order_connection()
     }
 
-  }
-
-  emit_room_order_connection(){
-    this.lobby.emit_room_order_connection(
-      this.lobby.userName !== undefined ? this.lobby.userName : 'randomName',
-      this.currentRoomID
-    );
   }
 
   get_lobby_state() {

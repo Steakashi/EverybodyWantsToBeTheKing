@@ -22,6 +22,7 @@ export class LobbyQueriesService{
   userID: string;
   userName: string;
   roomID: string;
+  urlRoomID: string;
   roomName: string;
   users = [];
   state: string = null;
@@ -33,6 +34,12 @@ export class LobbyQueriesService{
 
   set_title(title){
     this.title = title;
+  }
+
+  set_room_id_from_url(roomID){
+    console.log('set_room_id_from_url')
+    console.log(roomID)
+    this.urlRoomID = roomID;
   }
 
   connection_is_allowed(){
@@ -56,10 +63,9 @@ export class LobbyQueriesService{
   }
 
   confirm_connection(){
-    console.log('CONFIRM CONNECTION');
-    console.log(this.state);
     if (this.state === null){
-      console.log('###########" YES ! CONNECTING WELL ###########"');
+      console.log('confirm_connection')
+      this.emit_room_order_connection()
     }
     else{
       this.state = PENDING;
@@ -96,15 +102,15 @@ export class LobbyQueriesService{
     );
   }
 
-  emit_room_order_connection(userName, roomID){
+  emit_room_order_connection(){
     if (!this.connection_is_allowed()){ return; }
     this.wsService.emit(
       'room_connection',
       {
         action: 'room_connection',
         user_id: this.userID,
-        user_name: userName,
-        room_id: roomID,
+        user_name: this.userName !== undefined ? this.userName : 'randomName',
+        room_id: this.urlRoomID,
       }
     );
   }
@@ -142,6 +148,7 @@ export class LobbyQueriesService{
   }
 
   join_room(roomID, userID, userName, users){
+    console.log('JOINING ROOM')
     this.roomID = roomID;
     this.userName = userName;
     this.users = users;
