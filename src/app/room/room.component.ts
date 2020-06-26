@@ -14,6 +14,7 @@ import {WebsocketService} from '../services/websocket.service';
 })
 export class RoomComponent implements OnInit {
   currentRoomID = null;
+  currentUserName = 'Player';
   subscription: Subscription;
 
   constructor(private lobby: LobbyQueriesService,
@@ -55,7 +56,12 @@ export class RoomComponent implements OnInit {
   }
 
   get_player_name() {
+    console.log(this.lobby.userName);
     return this.lobby.userName;
+  }
+
+  update_player_name(userName){
+    this.lobby.emit_user_update(userName);
   }
 
   get_room_users() {

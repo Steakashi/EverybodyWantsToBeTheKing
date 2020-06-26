@@ -76,8 +76,10 @@ export class LobbyQueriesService{
     this.toastr.error('Connection has failed !');
   }
 
-  update_users(users){
+  update_users(users, userName){
     this.users = users;
+    this.userName = userName;
+    console.log(this.userName);
   }
 
   emit_room_order_creation(userName, roomName) {
@@ -107,6 +109,18 @@ export class LobbyQueriesService{
     );
   }
 
+  emit_user_update(userName){
+    this.wsService.emit(
+      'user_update',
+      {
+        action: 'user_update',
+        user_id: this.userID,
+        user_name: userName,
+        room_id: this.roomID,
+      }
+    );
+  }
+
   navigate_to_lobby(userName, roomID){
     //if (!this.connection_is_allowed()){ return; }
     this.roomID = roomID;
@@ -117,6 +131,8 @@ export class LobbyQueriesService{
   create_room(roomName, roomID, userName, userID){
     this.roomName = roomName;
     this.roomID = roomID;
+    console.log('CREATING ROOM');
+    console.log(this.roomID);
     this.userName = userName;
     this.users.push({
       user_name: this.userName,
@@ -126,6 +142,9 @@ export class LobbyQueriesService{
   }
 
   join_room(roomID, userID, userName, users){
+    this.roomID = roomID;
+    this.userName = userName;
+    this.users = users;
     this.validate_connection();
   }
 
@@ -146,16 +165,16 @@ export class LobbyQueriesService{
   }*/
 
   connect_user(){
-    const retrieved_id = this.cookie.get(this.title);
-    if ((retrieved_id === '') || (retrieved_id === undefined) || (retrieved_id === null)){
+    const retrievedID = this.cookie.get(this.title);
+    if ((retrievedID === '') || (retrievedID === undefined) || (retrievedID === null)){
       this.userID = uuid.v4();
       this.cookie.set(this.title, this.userID);
     }
     else{
-      this.userID = retrieved_id;
+      this.userID = retrievedID;
     }
     console.log('--');
-    console.log(retrieved_id);
+    console.log(retrievedID);
     console.log(this.userID);
 
     return this.userID;

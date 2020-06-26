@@ -44,10 +44,10 @@ export class AppComponent implements OnInit{
      // @ts-ignore
      console.log('Update connected users : ' + data.users);
      // @ts-ignore
-     this.lobby.update_users(data.users);
+     this.lobby.update_users(data.users, data.user_name);
     });
 
-   this.wsService.listen('room_creation').subscribe((data) => {
+    this.wsService.listen('room_creation').subscribe((data) => {
       // @ts-ignore
       console.log(data);
       // @ts-ignore

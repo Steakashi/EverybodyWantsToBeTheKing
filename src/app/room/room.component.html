@@ -2,7 +2,13 @@
 
 <div *ngIf="get_lobby_state()=='CONNECTED'">
   <h2>Bienvenue dans la salle : {{ get_room_name() }}</h2>
-  <h3>Vous êtes {{ get_player_name() }} (félicitations, c'est un très joli nom !)</h3>
+  <h3>
+    Vous êtes
+    <input #user_name type="text" id="username" value="{{ get_player_name() }}">
+    <button (click)="update_player_name(user_name.value)">Update</button>
+    (félicitations, c'est un très joli nom !)
+  </h3>
+
 
   <p *ngIf="!get_room_users()">Aucun autre joueur dans la salle.</p>
 

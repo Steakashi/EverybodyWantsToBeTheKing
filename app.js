@@ -85,6 +85,22 @@ io.on("connection", socket => {
     }
   });*/
 
+  socket.on("user_update", data => {
+    console.log("User update order received on server : " + data.room_id)
+    console.log(rooms)
+    console.log(data.room_id)
+    console.log(data.user_name)
+    rooms[data.room_id].forEach(user => {
+      if (user['user_id'] === data.user_id){
+        user['user_name'] = data.user_name;
+      }
+    })
+    console.log('--')
+    console.log(rooms[data.room_id])
+    console.log(data.user_name)
+    io.to(data.room_id).emit("update_users", { users: rooms[data.room_id], user_name: data.user_name });
+  })
+
   socket.on("room_creation", data => {
     console.log("Room creation order received on server : " + data.room_id);
     rooms[data.room_id] = [{
@@ -120,7 +136,7 @@ io.on("connection", socket => {
         user_name: data.user_name
       });
 
-      io.to(data.room_id).emit("update_users", { users: rooms[data.room_id] });
+      io.to(data.room_id).emit("update_users", { users: rooms[data.room_id], user_name: data.user_name });
     }
 
     else {
