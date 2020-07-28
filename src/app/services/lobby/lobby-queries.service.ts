@@ -82,10 +82,8 @@ export class LobbyQueriesService{
     this.toastr.error('Connection has failed !');
   }
 
-  update_users(users, userName){
+  update_users(users){
     this.users = users;
-    this.userName = userName;
-    console.log(this.userName);
   }
 
   emit_room_order_creation(userName, roomName) {
