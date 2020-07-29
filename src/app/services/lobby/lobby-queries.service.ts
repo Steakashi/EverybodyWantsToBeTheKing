@@ -63,8 +63,7 @@ export class LobbyQueriesService{
   }
 
   confirm_connection(){
-    if (this.state === null){
-      console.log('confirm_connection')
+    if ((this.state === null) && ((this.urlRoomID !== undefined)) ){
       this.emit_room_order_connection()
     }
     else{
@@ -178,9 +177,6 @@ export class LobbyQueriesService{
     else{
       this.userID = retrievedID;
     }
-    console.log('--');
-    console.log(retrievedID);
-    console.log(this.userID);
 
     return this.userID;
     // this.cookie.delete(this.title);

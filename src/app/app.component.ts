@@ -72,11 +72,10 @@ export class AppComponent implements OnInit{
 
 
    this.lobby.set_title(this.title);
-   this.lobby.connect_user();
    console.log('Lobby Service initialized');
 
    this.wsService.emit('user_connection', {
-     user_id: this.lobby.get_user_id()
+     user_id: this.lobby.connect_user()
    });
 
   }
