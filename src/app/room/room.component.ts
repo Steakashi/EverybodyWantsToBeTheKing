@@ -6,6 +6,7 @@ import { filter } from 'rxjs/operators';
 import {Observable, Observer, Subscription} from 'rxjs';
 import {LobbyResponsesService} from '../services/lobby/lobby-responses.service';
 import {WebsocketService} from '../services/websocket.service';
+import {ExecutionPileService} from '../services/execution-pile.service';
 
 @Component({
   selector: 'app-room',
@@ -19,26 +20,14 @@ export class RoomComponent implements OnInit {
   constructor(private lobby: LobbyQueriesService,
               private lobbyR: LobbyResponsesService,
               private wsService: WebsocketService,
+              private executionPile: ExecutionPileService,
               private route: ActivatedRoute,
               private router: Router) {}
 
   ngOnInit(): void {
-    this.wsService.listen('room_unknown').subscribe((data) => {
-      // @ts-ignore
-      console.log('Room connection order received, but no corresponding room found. Id : ' + data.room_id);
-      this.lobby.invalidate_connection();
-    });
-
-    // this.route.queryParams.subscribe(params => {
-    //   console.log(params)
-    //   console.log(params.id)
-    //   this.lobby.set_room_id_from_url(params.id);
-    // });
-    
-    this.lobby.set_room_id_from_url(this.route.snapshot.params.id);
-
-    if (this.lobby.is_waiting_order()){
-      this.lobby.emit_room_order_connection()
+    if (!this.lobby.is_waiting_order()){
+      this.lobby.set_room_id_from_url(this.route.snapshot.params.id);
+      this.executionPile.register(this.lobby.emit_room_order_connection.bind(this.lobby));
     }
 
   }

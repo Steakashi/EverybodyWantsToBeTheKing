@@ -99,6 +99,7 @@ io.on("connection", socket => {
     console.log(rooms[data.room_id])
     console.log(data.user_name)
     io.to(data.room_id).emit("update_users", { users: rooms[data.room_id], user_name: data.user_name });
+    socket.emit("update_user", {user_name: data.user_name})
   })
 
   socket.on("room_creation", data => {

@@ -4,6 +4,7 @@ import { WebsocketService } from '../websocket.service';
 import * as uuid from 'uuid';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
+import {ExecutionPileService} from '../execution-pile.service';
 
 
 const PENDING = 'PENDING';
@@ -12,7 +13,6 @@ const CONNECTED = 'CONNECTED';
 const DISCONNECTED = 'DISCONNECTED';
 const BLOCKED = 'BLOCKED';
 const ERROR = 'ERROR';
-
 
 
 @Injectable()
@@ -29,6 +29,7 @@ export class LobbyQueriesService{
 
   constructor(private toastr: ToastrService,
               private wsService: WebsocketService,
+              private executionPile: ExecutionPileService,
               private router: Router,
               private cookie: CookieService) {}
 
@@ -37,13 +38,10 @@ export class LobbyQueriesService{
   }
 
   set_room_id_from_url(roomID){
-    console.log('set_room_id_from_url')
-    console.log(roomID)
-    this.urlRoomID = roomID;
+    this.roomID = roomID;
   }
 
   connection_is_allowed(){
-    console.log('STATE : ' + this.state);
     if (this.state === BLOCKED){ return false; }
     else {
       this.state = PROCESSING;
@@ -52,40 +50,39 @@ export class LobbyQueriesService{
   }
 
   is_waiting_order(){
-    console.log('STATE ORDER : ' + this.state);
-    return this.state === PENDING;
-  }
-
-  block_connection(){
-    console.log('connection_blocked');
-    this.state = BLOCKED;
-    this.toastr.error('Connection refused : user already connected to the application.');
-  }
-
-  confirm_connection(){
-    if (this.state === null){
-      console.log('confirm_connection')
-      this.emit_room_order_connection()
-    }
-    else{
-      this.state = PENDING;
-    }
+    return (this.state === PENDING) || (this.state === PROCESSING);
   }
 
   validate_connection(){
     this.state = CONNECTED;
     this.toastr.success('Connection successfull !');
+    this.executionPile.flush();
   }
 
   invalidate_connection(){
     this.state = ERROR;
     this.toastr.error('Connection has failed !');
+    this.executionPile.flush();
   }
 
-  update_users(users, userName){
+  block_connection(){
+    this.state = BLOCKED;
+    this.toastr.error('Connection refused : user already connected to the application.');
+    this.executionPile.flush();
+  }
+
+  confirm_connection(){
+    this.state = this.executionPile.is_empty() ? PENDING : PROCESSING;
+    this.executionPile.process();
+  }
+
+
+  update_users(users){
     this.users = users;
+  }
+
+  update_user(userName){
     this.userName = userName;
-    console.log(this.userName);
   }
 
   emit_room_order_creation(userName, roomName) {
@@ -110,7 +107,7 @@ export class LobbyQueriesService{
         action: 'room_connection',
         user_id: this.userID,
         user_name: this.userName !== undefined ? this.userName : 'randomName',
-        room_id: this.urlRoomID,
+        room_id: this.roomID,
       }
     );
   }
@@ -131,7 +128,8 @@ export class LobbyQueriesService{
     //if (!this.connection_is_allowed()){ return; }
     this.roomID = roomID;
     this.userName = userName;
-    this.router.navigate(['room/' + this.roomID]);
+    this.router.navigate(['room/' + this.roomID]).then(() => { this.emit_room_order_connection(); });
+    //
   }
 
   create_room(roomName, roomID, userName, userID){
