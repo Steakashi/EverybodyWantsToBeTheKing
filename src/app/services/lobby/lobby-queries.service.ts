@@ -50,27 +50,7 @@ export class LobbyQueriesService{
   }
 
   is_waiting_order(){
-<<<<<<< HEAD
     return (this.state === PENDING) || (this.state === PROCESSING);
-=======
-    console.log('STATE ORDER : ' + this.state);
-    return this.state === PENDING;
-  }
-
-  block_connection(){
-    console.log('connection_blocked');
-    this.state = BLOCKED;
-    this.toastr.error('Connection refused : user already connected to the application.');
-  }
-
-  confirm_connection(){
-    if ((this.state === null) && ((this.urlRoomID !== undefined)) ){
-      this.emit_room_order_connection()
-    }
-    else{
-      this.state = PENDING;
-    }
->>>>>>> 2ef2aa8f6aa64d3f7a4e5872f852e2edb21174a3
   }
 
   validate_connection(){
@@ -85,7 +65,6 @@ export class LobbyQueriesService{
     this.executionPile.flush();
   }
 
-<<<<<<< HEAD
   block_connection(){
     this.state = BLOCKED;
     this.toastr.error('Connection refused : user already connected to the application.');
@@ -97,17 +76,12 @@ export class LobbyQueriesService{
     this.executionPile.process();
   }
 
-
   update_users(users){
     this.users = users;
   }
 
   update_user(userName){
     this.userName = userName;
-=======
-  update_users(users){
-    this.users = users;
->>>>>>> 2ef2aa8f6aa64d3f7a4e5872f852e2edb21174a3
   }
 
   emit_room_order_creation(userName, roomName) {
@@ -150,7 +124,6 @@ export class LobbyQueriesService{
   }
 
   navigate_to_lobby(userName, roomID){
-    //if (!this.connection_is_allowed()){ return; }
     this.roomID = roomID;
     this.userName = userName;
     this.router.navigate(['room/' + this.roomID]).then(() => { this.emit_room_order_connection(); });
@@ -171,7 +144,6 @@ export class LobbyQueriesService{
   }
 
   join_room(roomID, userID, userName, users){
-    console.log('JOINING ROOM')
     this.roomID = roomID;
     this.userName = userName;
     this.users = users;
