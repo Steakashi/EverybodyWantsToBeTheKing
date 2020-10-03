@@ -50,7 +50,27 @@ export class LobbyQueriesService{
   }
 
   is_waiting_order(){
+<<<<<<< HEAD
     return (this.state === PENDING) || (this.state === PROCESSING);
+=======
+    console.log('STATE ORDER : ' + this.state);
+    return this.state === PENDING;
+  }
+
+  block_connection(){
+    console.log('connection_blocked');
+    this.state = BLOCKED;
+    this.toastr.error('Connection refused : user already connected to the application.');
+  }
+
+  confirm_connection(){
+    if ((this.state === null) && ((this.urlRoomID !== undefined)) ){
+      this.emit_room_order_connection()
+    }
+    else{
+      this.state = PENDING;
+    }
+>>>>>>> 2ef2aa8f6aa64d3f7a4e5872f852e2edb21174a3
   }
 
   validate_connection(){
@@ -65,6 +85,7 @@ export class LobbyQueriesService{
     this.executionPile.flush();
   }
 
+<<<<<<< HEAD
   block_connection(){
     this.state = BLOCKED;
     this.toastr.error('Connection refused : user already connected to the application.');
@@ -83,6 +104,10 @@ export class LobbyQueriesService{
 
   update_user(userName){
     this.userName = userName;
+=======
+  update_users(users){
+    this.users = users;
+>>>>>>> 2ef2aa8f6aa64d3f7a4e5872f852e2edb21174a3
   }
 
   emit_room_order_creation(userName, roomName) {
@@ -178,9 +203,6 @@ export class LobbyQueriesService{
     else{
       this.userID = retrievedID;
     }
-    console.log('--');
-    console.log(retrievedID);
-    console.log(this.userID);
 
     return this.userID;
     // this.cookie.delete(this.title);

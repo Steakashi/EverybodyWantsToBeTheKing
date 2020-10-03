@@ -40,12 +40,16 @@ io.on("connection", socket => {
     if (user_id in users){
       room_id = users[user_id]
 
-      rooms[room_id].forEach(element => {
-        if (element['user_id'] === user_id) {
-          rooms[room_id].splice(rooms[room_id].indexOf(element), 1);
-        }
-      })
-
+      if (room_id !== null){
+        console.log(rooms);
+        console.log(room_id);
+        console.log(rooms[room_id]);
+        rooms[room_id].forEach(element => {
+          if (element['user_id'] === user_id) {
+            rooms[room_id].splice(rooms[room_id].indexOf(element), 1);
+          }
+        })
+      }
     }
     else { room_id = undefined; }
 
