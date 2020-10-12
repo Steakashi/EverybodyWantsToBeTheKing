@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {LobbyQueriesService} from './lobby/lobby-queries.service';
+import {LobbyService} from './lobby.service';
 
 @Injectable({
   providedIn: 'root'

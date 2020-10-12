@@ -1,9 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 
 
-import {LobbyQueriesService} from './services/lobby/lobby-queries.service';
+import {LobbyService} from './services/lobby.service';
 import {WebsocketService} from './services/websocket.service';
-import {LobbyResponsesService} from './services/lobby/lobby-responses.service';
 
 
 @Component({
@@ -64,8 +63,7 @@ export class AppComponent implements OnInit{
   ];
 
   constructor(private wsService: WebsocketService,
-              private lobby: LobbyQueriesService,
-              private response: LobbyResponsesService) {}
+              private lobby: LobbyService) {}
 
   generate_signal(signalObject){
     this.wsService.listen(signalObject.event_name).subscribe((data) => {

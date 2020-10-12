@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 
 
-import { LobbyQueriesService } from '../services/lobby/lobby-queries.service';
+import { LobbyService } from './lobby.service';
 
 
 @Injectable({
@@ -11,7 +11,7 @@ import { LobbyQueriesService } from '../services/lobby/lobby-queries.service';
 })
 export class AuthGuardService implements CanActivate {
 
-  constructor(private lobby: LobbyQueriesService) { }
+  constructor(private lobby: LobbyService) { }
 
   canActivate(
     route: ActivatedRouteSnapshot,

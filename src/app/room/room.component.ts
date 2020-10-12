@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router, RouterEvent} from '@angular/router';
 
-import { LobbyQueriesService } from '../services/lobby/lobby-queries.service';
+import { LobbyService } from '../services/lobby.service';
 import { filter } from 'rxjs/operators';
 import {Observable, Observer, Subscription} from 'rxjs';
-import {LobbyResponsesService} from '../services/lobby/lobby-responses.service';
 import {WebsocketService} from '../services/websocket.service';
 import {ExecutionPileService} from '../services/execution-pile.service';
 
@@ -17,8 +16,7 @@ export class RoomComponent implements OnInit {
   currentUserName = 'Player';
   subscription: Subscription;
 
-  constructor(private lobby: LobbyQueriesService,
-              private lobbyR: LobbyResponsesService,
+  constructor(private lobby: LobbyService,
               private wsService: WebsocketService,
               private executionPile: ExecutionPileService,
               private route: ActivatedRoute,

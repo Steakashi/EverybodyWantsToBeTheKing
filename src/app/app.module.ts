@@ -9,8 +9,7 @@ import { AppComponent } from './app.component';
 import { AuthGuardService } from './services/auth-guard.service';
 import { WebsocketService } from './services/websocket.service';
 import { HomeComponent } from './home/home.component';
-import { LobbyQueriesService } from './services/lobby/lobby-queries.service';
-import { LobbyResponsesService } from './services/lobby/lobby-responses.service';
+import { LobbyService } from './services/lobby.service';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { RoomComponent } from './room/room.component';
@@ -36,13 +35,12 @@ const appRoutes: Routes = [
     FormsModule,
     RouterModule.forRoot(appRoutes),
     BrowserAnimationsModule,
-	  ToastrModule.forRoot()
+    ToastrModule.forRoot()
   ],
   providers: [
     AuthGuardService,
     WebsocketService,
-    LobbyQueriesService,
-    LobbyResponsesService,
+    LobbyService,
     CookieService
   ],
   bootstrap: [AppComponent]

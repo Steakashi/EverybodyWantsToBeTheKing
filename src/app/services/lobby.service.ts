@@ -1,10 +1,10 @@
 import {Injectable} from '@angular/core';
 import { ToastrService  } from 'ngx-toastr';
-import { WebsocketService } from '../websocket.service';
+import { WebsocketService } from './websocket.service';
 import * as uuid from 'uuid';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
-import {ExecutionPileService} from '../execution-pile.service';
+import {ExecutionPileService} from './execution-pile.service';
 
 
 const PENDING = 'PENDING';
@@ -16,7 +16,7 @@ const ERROR = 'ERROR';
 
 
 @Injectable()
-export class LobbyQueriesService{
+export class LobbyService{
   title: string;
   socketID: string;
   userID: string;
