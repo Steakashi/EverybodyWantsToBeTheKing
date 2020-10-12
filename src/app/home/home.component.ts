@@ -1,7 +1,5 @@
 import { Component } from '@angular/core';
 import { LobbyService } from '../services/lobby.service';
-import * as uuid from 'uuid';
-import {WebsocketService} from '../services/websocket.service';
 import {NgForm} from '@angular/forms';
 
 
@@ -13,8 +11,7 @@ import {NgForm} from '@angular/forms';
 
 export class HomeComponent {
 
-  constructor(private lobby: LobbyService,
-              private wsService: WebsocketService){ }
+  constructor(private lobby: LobbyService){ }
 
 
   send_form(form: NgForm){

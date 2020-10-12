@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import {ActivatedRoute, NavigationEnd, Router, RouterEvent} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 
 import { LobbyService } from '../services/lobby.service';
-import { filter } from 'rxjs/operators';
-import {Observable, Observer, Subscription} from 'rxjs';
 import {WebsocketService} from '../services/websocket.service';
 import {ExecutionPileService} from '../services/execution-pile.service';
 
@@ -13,14 +11,11 @@ import {ExecutionPileService} from '../services/execution-pile.service';
   styleUrls: ['./room.component.scss'],
 })
 export class RoomComponent implements OnInit {
-  currentUserName = 'Player';
-  subscription: Subscription;
 
   constructor(private lobby: LobbyService,
               private wsService: WebsocketService,
               private executionPile: ExecutionPileService,
-              private route: ActivatedRoute,
-              private router: Router) {}
+              private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     if (!this.lobby.is_waiting_order()){
@@ -39,7 +34,6 @@ export class RoomComponent implements OnInit {
   }
 
   get_player_name() {
-    console.log(this.lobby.userName);
     return this.lobby.userName;
   }
 

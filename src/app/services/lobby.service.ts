@@ -41,6 +41,14 @@ export class LobbyService{
     this.roomID = roomID;
   }
 
+  get_user_id(){
+    return this.userID;
+  }
+
+  get_current_room_name(){
+    return this.roomName;
+  }
+
   connection_is_allowed(){
     if (this.state === BLOCKED){ return false; }
     else {
@@ -72,18 +80,8 @@ export class LobbyService{
   }
 
   confirm_connection(){
-    console.log('####### CONFIRM CONNECTION');
-    console.log(this);
     this.state = this.executionPile.is_empty() ? PENDING : PROCESSING;
     this.executionPile.process();
-  }
-
-  update_users(users){
-    this.users = users;
-  }
-
-  update_user(userName){
-    this.userName = userName;
   }
 
   emit_room_order_creation(userName, roomName) {
@@ -125,18 +123,26 @@ export class LobbyService{
     );
   }
 
+  emit_user_disconnection(){
+    this.wsService.emit(
+      'user_disconnection',
+      {
+        action: 'user_disconnection',
+        room_id: this.roomID,
+        user_id: this.userID,
+      }
+    );
+  }
+
   navigate_to_lobby(userName, roomID){
     this.roomID = roomID;
     this.userName = userName;
     this.router.navigate(['room/' + this.roomID]).then(() => { this.emit_room_order_connection(); });
-    //
   }
 
   create_room(roomName, roomID, userName, userID){
     this.roomName = roomName;
     this.roomID = roomID;
-    console.log('CREATING ROOM');
-    console.log(this.roomID);
     this.userName = userName;
     this.users.push({
       user_name: this.userName,
@@ -152,22 +158,6 @@ export class LobbyService{
     this.validate_connection();
   }
 
-  get_current_room_name(){
-    console.log('return name : ' + this.roomName);
-    return this.roomName;
-  }
-  /*
-  connect_user(){
-    this.wsService.emit(
-      'user_connexion',
-      {
-        action: 'user_connexion',
-        room_id: null,
-        user_id: this.userID,
-      }
-    );
-  }*/
-
   connect_user(){
     const retrievedID = this.cookie.get(this.title);
     if ((retrievedID === '') || (retrievedID === undefined) || (retrievedID === null)){
@@ -179,25 +169,15 @@ export class LobbyService{
     }
 
     return this.userID;
-    // this.cookie.delete(this.title);
-    // this.userID = uuid.v4()
-    // this.cookie.set(this.title, 'test cookie');
-    // console.log(this.cookie.get(this.title));
   }
 
-  get_user_id(){
-    return this.userID;
+
+  update_users(users){
+    this.users = users;
   }
 
-  disconnect_user(){
-    this.wsService.emit(
-      'user_disconnection',
-      {
-        action: 'user_disconnection',
-        room_id: this.roomID,
-        user_id: this.userID,
-      }
-    );
+  update_user(userName){
+    this.userName = userName;
   }
 
 }

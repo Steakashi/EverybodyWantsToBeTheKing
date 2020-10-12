@@ -56,7 +56,7 @@ export class AppComponent implements OnInit{
     },
     {
       event_name: 'disconnection_order',
-      callback: this.lobby.disconnect_user.bind(this.lobby),
+      callback: this.lobby.emit_user_disconnection.bind(this.lobby),
       args: [],
     },
 
