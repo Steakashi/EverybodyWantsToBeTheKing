@@ -15,7 +15,7 @@ export class AppComponent implements OnInit{
 
   signals = [
     {
-      event_name: 'confirm_user_connection',
+      event_name: 'user_connection_confirmed',
       callback: this.lobby.confirm_connection.bind(this.lobby),
       args: [],
     },
@@ -30,12 +30,12 @@ export class AppComponent implements OnInit{
       args: ['users'],
     },
     {
-      event_name: 'update_users',
+      event_name: 'users_update',
       callback: this.lobby.update_users.bind(this.lobby),
       args: ['users'],
     },
     {
-      event_name: 'update_user',
+      event_name: 'user_update',
       callback: this.lobby.update_user.bind(this.lobby),
       args: ['user_name'],
     },
@@ -54,12 +54,6 @@ export class AppComponent implements OnInit{
       callback: this.lobby.invalidate_connection.bind(this.lobby),
       args: [],
     },
-    {
-      event_name: 'disconnection_order',
-      callback: this.lobby.emit_user_disconnection.bind(this.lobby),
-      args: [],
-    },
-
   ];
 
   constructor(private wsService: WebsocketService,

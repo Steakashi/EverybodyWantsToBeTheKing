@@ -27,7 +27,7 @@ io.on("connection", socket => {
     else{
       users[data.user_id] = null;
       sockets[socket.id] = data.user_id;
-      socket.emit('confirm_user_connection');
+      socket.emit('user_connection_confirmed');
     }
   });
 
@@ -65,30 +65,6 @@ io.on("connection", socket => {
     if (rooms[room_id] === undefined) { delete rooms[room_id]; }
 
   });
-  /*
-  socket.on("user_disconnection", data => {
-    console.log("User disconnection order received from user " + data.user_id + " on room id " + data.room_id);
-
-    if (rooms[data.room_id] !== undefined) {
-
-      rooms[data.room_id].foreach(element => {
-        if (element['user_id'] === data.user_id) {
-          rooms[data.room_id].splice(rooms[data.room_id].indexOf(element), 1);
-        }
-      })
-
-      if (rooms[data.room_id].length <= 0) {
-        rooms.splice(rooms.indexOf(data.room_id), 1);
-      }
-
-      io.emit("user_disconnection", {
-        room_id: data.room_id,
-        user_id: data.user_id,
-        users: rooms[data.room_id]
-      });
-
-    }
-  });*/
 
   socket.on("user_update", data => {
     console.log("User update order received on server : " + data.room_id)
@@ -103,8 +79,8 @@ io.on("connection", socket => {
     console.log('--')
     console.log(rooms[data.room_id])
     console.log(data.user_name)
-    io.to(data.room_id).emit("update_users", { users: rooms[data.room_id], user_name: data.user_name });
-    socket.emit("update_user", {user_name: data.user_name})
+    io.to(data.room_id).emit("users_update", { users: rooms[data.room_id], user_name: data.user_name });
+    socket.emit("user_update", {user_name: data.user_name})
   })
 
   socket.on("room_creation", data => {
@@ -144,7 +120,7 @@ io.on("connection", socket => {
         user_name: data.user_name
       });
 
-      io.to(data.room_id).emit("update_users", { users: rooms[data.room_id], user_name: data.user_name });
+      io.to(data.room_id).emit("users_update", { users: rooms[data.room_id], user_name: data.user_name });
     }
 
     else {

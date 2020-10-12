@@ -123,17 +123,6 @@ export class LobbyService{
     );
   }
 
-  emit_user_disconnection(){
-    this.wsService.emit(
-      'user_disconnection',
-      {
-        action: 'user_disconnection',
-        room_id: this.roomID,
-        user_id: this.userID,
-      }
-    );
-  }
-
   navigate_to_lobby(userName, roomID){
     this.roomID = roomID;
     this.userName = userName;
