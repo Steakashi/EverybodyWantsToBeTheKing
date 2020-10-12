@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 
 var rooms = {}
 var users = {}
+var names = {}
 var sockets = {}
 
 
@@ -113,6 +114,7 @@ io.on("connection", socket => {
       'user_name': data.user_name
     }];
     users[data.user_id] = data.room_id;
+    names[data.room_id] = data.room_name;
     socket.join(data.room_id);
 
     io.to(data.room_id).emit("room_creation", {
@@ -137,6 +139,7 @@ io.on("connection", socket => {
 
       socket.emit("room_connection", {
         room_id: data.room_id,
+        room_name: names[data.room_id],
         user_id: data.user_id,
         user_name: data.user_name
       });

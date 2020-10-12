@@ -72,6 +72,8 @@ export class LobbyQueriesService{
   }
 
   confirm_connection(){
+    console.log('####### CONFIRM CONNECTION');
+    console.log(this);
     this.state = this.executionPile.is_empty() ? PENDING : PROCESSING;
     this.executionPile.process();
   }
@@ -143,10 +145,10 @@ export class LobbyQueriesService{
     this.router.navigate(['room/' + this.roomID]).then(() => { this.validate_connection(); });
   }
 
-  join_room(roomID, userID, userName, users){
+  join_room(roomID, roomName, userID, userName){
     this.roomID = roomID;
+    this.roomName = roomName;
     this.userName = userName;
-    this.users = users;
     this.validate_connection();
   }
 
