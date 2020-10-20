@@ -16,9 +16,6 @@ export class AuthGuardService implements CanActivate {
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
-      if (this.lobby.state === 'BLOCKED'){
-        console.log('blocked');
-      }
-      else { console.log('allowed'); return true; }
+      return this.lobby.state !== 'BLOCKED';
   }
 }

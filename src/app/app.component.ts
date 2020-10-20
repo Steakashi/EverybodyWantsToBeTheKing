@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 
 
 import {LobbyService} from './services/lobby.service';
+import {LogService} from './services/log-service.service';
 import {WebsocketService} from './services/websocket.service';
 
 
@@ -18,50 +19,60 @@ export class AppComponent implements OnInit{
       event_name: 'user_connection_confirmed',
       callback: this.lobby.confirm_connection.bind(this.lobby),
       args: [],
+      log: 'A user has logged into the application'
     },
     {
       event_name: 'user_duplicated',
       callback: this.lobby.block_connection.bind(this.lobby),
       args: [],
+      log: 'Duplicated user found. Connection needs to be aborted'
     },
     {
       event_name: 'user_disconnection',
       callback: this.lobby.update_users.bind(this.lobby),
       args: ['users'],
+      log: 'A user has logged out of the application'
     },
     {
       event_name: 'users_update',
       callback: this.lobby.update_users.bind(this.lobby),
       args: ['users'],
+      log: 'Users data has been updated from server'
     },
     {
       event_name: 'user_update',
       callback: this.lobby.update_user.bind(this.lobby),
       args: ['user_name'],
+      log: 'Single user data has been updated from server'
     },
     {
       event_name: 'room_creation',
       callback: this.lobby.create_room.bind(this.lobby),
-      args: ['room_name', 'room_id', 'user_name']
+      args: ['room_name', 'room_id', 'user_name'],
+      log: 'Room creation order received from server'
     },
     {
       event_name: 'room_connection',
       callback: this.lobby.join_room.bind(this.lobby),
       args: ['room_id', 'room_name', 'user_id', 'user_name', 'users'],
+      log: 'Room connection order received from server'
     },
     {
       event_name: 'room_unknown',
       callback: this.lobby.invalidate_connection.bind(this.lobby),
       args: [],
+      log: 'A user tried to join a room, but no one has been found from given id'
     },
   ];
 
   constructor(private wsService: WebsocketService,
-              private lobby: LobbyService) {}
+              private lobby: LobbyService,
+              private logger: LogService) {}
 
   generate_signal(signalObject){
     this.wsService.listen(signalObject.event_name).subscribe((data) => {
       signalObject.callback(...signalObject.args.map((elt) => data[elt]));
+      this.logger.debug(signalObject.log);
     });
   }
 
@@ -69,7 +80,6 @@ export class AppComponent implements OnInit{
 
     this.lobby.set_title(this.title);
     this.lobby.connect_user();
-    console.log('Lobby Service initialized');
 
     this.signals.forEach(signal => {
       this.generate_signal(signal);

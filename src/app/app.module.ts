@@ -6,6 +6,7 @@ import { ToastrModule } from 'ngx-toastr';
 
 import { AppComponent } from './app.component';
 
+import { LogService } from './services/log-service.service';
 import { AuthGuardService } from './services/auth-guard.service';
 import { WebsocketService } from './services/websocket.service';
 import { HomeComponent } from './home/home.component';
@@ -38,6 +39,7 @@ const appRoutes: Routes = [
     ToastrModule.forRoot()
   ],
   providers: [
+    LogService,
     AuthGuardService,
     WebsocketService,
     LobbyService,

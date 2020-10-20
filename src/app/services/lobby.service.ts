@@ -18,11 +18,9 @@ const ERROR = 'ERROR';
 @Injectable()
 export class LobbyService{
   title: string;
-  socketID: string;
   userID: string;
   userName: string;
   roomID: string;
-  urlRoomID: string;
   roomName: string;
   users = [];
   state: string = null;
