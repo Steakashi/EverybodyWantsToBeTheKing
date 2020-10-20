@@ -42,7 +42,7 @@ export class AppComponent implements OnInit{
     {
       event_name: 'room_creation',
       callback: this.lobby.create_room.bind(this.lobby),
-      args: ['room_name', 'room_id', 'user_name', 'user_id'],
+      args: ['room_name', 'room_id', 'user_name']
     },
     {
       event_name: 'room_connection',

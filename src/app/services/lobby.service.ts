@@ -129,7 +129,7 @@ export class LobbyService{
     this.router.navigate(['room/' + this.roomID]).then(() => { this.emit_room_order_connection(); });
   }
 
-  create_room(roomName, roomID, userName, userID){
+  create_room(roomName, roomID, userName){
     this.roomName = roomName;
     this.roomID = roomID;
     this.userName = userName;
