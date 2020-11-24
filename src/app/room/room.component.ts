@@ -30,11 +30,11 @@ export class RoomComponent implements OnInit {
   }
 
   get_room_name() {
-    return this.lobby.roomName;
+    return this.lobby.room.name;
   }
 
   get_player_name() {
-    return this.lobby.userName;
+    return this.lobby.user.name;
   }
 
   update_player_name(userName){
@@ -42,6 +42,7 @@ export class RoomComponent implements OnInit {
   }
 
   get_room_users() {
+    console.log(this.lobby.users);
     return this.lobby.users;
   }
 

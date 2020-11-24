@@ -4,129 +4,248 @@ let io = require("socket.io")(http);
 const { v4: uuidv4 } = require('uuid');
 
 
-var rooms = {}
-var users = {}
-var names = {}
-var sockets = {}
+var rooms = []
+var users = []
+var names = []
+var sockets = []
 
 
-function parse_incoming_data(data){
-  return JSON.parse(data);
+function _is_not_empty(object){
+  return (!(Object.keys(object).length === 0 && object.constructor === Object));
+}
+
+
+function get_room(room_id){
+  var room_found = null;
+  rooms.forEach(room => {
+    if (room.id === room_id){ console.log(room); room_found = room; }
+  })
+  return room_found;
+}
+
+function get_user(id){
+  if (id in users){ return users[id]; }
+  else { return null; }
+}
+
+function delete_user(user){
+  users.forEach(element => {
+    if (element === user) {
+      users.splice(users.indexOf(element), 1);
+    }
+  });
+}
+
+function delete_room(room){
+  rooms.forEach(element => {
+    if (element === room) {
+      rooms.splice(rooms.indexOf(element), 1);
+    }
+  });
+}
+
+
+class ServerInstance{
+  socket;
+  user;
+  room;
+
+
+  constructor(socket) {
+    this.socket = socket;
+    console.log("User connected on socket " + socket.id);
+  }
+
+  emit(event_name, data={}){
+    io.emit(event_name, data);
+  }
+
+  emit_to_user(event_name, data={}){
+    this.socket.emit(event_name, data);
+  }
+
+  emit_to_room(event_name, data={}){
+    io.to(this.room.id).emit(event_name, data);
+  }
+
+  generate_user(user_id){
+    this.user = new User(user_id);
+    users.push(this.user);
+  }
+
+  set_room(room){
+    this.room = room
+  }
+
+  join_room(){
+    this.room.add_user(this.user);
+    this.socket.join(this.room.id);
+  }
+
+  delete_room(){
+    delete this.room;
+  }
+
+  generate_room(room_id, room_name){
+    this.room = new Room(room_id, room_name);
+    this.room.add_user(this.user);
+    this.socket.join(room_id);
+    rooms.push(this.room);
+    this.emit_to_room(
+      'room_creation',
+      {
+        room_id: this.room.id,
+        room_name: this.room.name,
+        user_id: this.user.id,
+        user_name: this.user.name
+      }
+    )
+  }
+}
+
+class User{
+
+  constructor(id, name=""){
+    this.id = id;
+    this.name = name;
+  }
+
+  update_name(name){
+    this.name = name;
+  }
+
+}
+
+class Room{
+  id;
+  name;
+  users;
+
+  constructor(id, name){
+    this.id = id;
+    this.name = name;
+    this.users = [];
+  }
+
+  add_user(user){
+    this.users.push(user)
+  }
+
+  remove_user(user){
+    this.users.forEach(element => {
+      if (element === user) {
+        this.users.splice(this.users.indexOf(element), 1);
+      }
+    });
+  }
+
 }
 
 
 io.on("connection", socket => {
-  console.log("User connected on socket " + socket.id);
-  socket.emit("user_connection");
+  const server = new ServerInstance(socket);
+  server.emit_to_user('user_connection');
 
   socket.on('user_connection', data => {
-    if (data.user_id in users){
+    if (get_user(data.user_id)){
       console.log("Warning : multiple connection from single user detected");
-      socket.emit('user_duplicated');
+      server.emit_to_user('user_duplicated');
     }
     else{
-      users[data.user_id] = null;
-      sockets[socket.id] = data.user_id;
-      socket.emit('user_connection_confirmed');
+      server.generate_user(data.user_id);
+      server.emit_to_user('user_connection_confirmed');
     }
   });
 
   socket.on("disconnect", function() {
+    console.log("User with id " + server.user.id +  " disconnected");
+    user_id = server.user.id;
 
-    user_id = sockets[socket.id]
-    if (!(user_id in users)){ return }
+    if (server.room !== undefined){
+      server.room.remove_user(server.user);
+      room_id = server.room.id;
+      room_users = server.room.users
+      delete_room(server.room);
+      if (server.room.users.length === 0){ server.delete_room() }
 
-    console.log("User with id " + user_id +  " disconnected");
-
-    if (user_id in users){
-      room_id = users[user_id]
-
-      if (room_id !== null){
-        console.log(rooms);
-        console.log(room_id);
-        console.log(rooms[room_id]);
-        rooms[room_id].forEach(element => {
-          if (element['user_id'] === user_id) {
-            rooms[room_id].splice(rooms[room_id].indexOf(element), 1);
-          }
-        })
-      }
+    } else {
+      room_id = undefined;
+      room_users = [];
     }
-    else { room_id = undefined; }
 
-    delete users[user_id]
+    user_id = server.user.id
+    delete_user(server.user)
 
-    io.emit("user_disconnection", {
-      room_id: room_id,
-      user_id: user_id,
-      users: rooms[room_id]
-    });
-
-    if (rooms[room_id] === undefined) { delete rooms[room_id]; }
-
+    server.emit(
+      "user_disconnected",
+      {
+        room_id: room_id,
+        user_id: user_id,
+        users: room_users
+      }
+    );
   });
 
   socket.on("user_update", data => {
     console.log("User update order received on server : " + data.room_id)
-    console.log(rooms)
-    console.log(data.room_id)
-    console.log(data.user_name)
-    rooms[data.room_id].forEach(user => {
-      if (user['user_id'] === data.user_id){
-        user['user_name'] = data.user_name;
+    get_user(data.user_id).update(data.user_name);
+    server.emit_to_room(
+      "users_update",
+      {
+        users: server.room.users,
+        user_name: data.user_name
       }
-    })
-    console.log('--')
-    console.log(rooms[data.room_id])
-    console.log(data.user_name)
-    io.to(data.room_id).emit("users_update", { users: rooms[data.room_id], user_name: data.user_name });
-    socket.emit("user_update", {user_name: data.user_name})
+    )
+    server.emit_to_user(
+      "user_update",
+      {user_name: data.user_name}
+    )
   })
 
   socket.on("room_creation", data => {
     console.log("Room creation order received on server : " + data.room_id);
-    rooms[data.room_id] = [{
-      'user_id': data.user_id,
-      'user_name': data.user_name
-    }];
-    users[data.user_id] = data.room_id;
-    names[data.room_id] = data.room_name;
-    socket.join(data.room_id);
-
-    io.to(data.room_id).emit("room_creation", {
-      room_id: data.room_id,
-      room_name: data.room_name,
-      user_id: data.user_id,
-      user_name: data.user_name
-    });
+    server.user.update_name(data.user_name);
+    server.generate_room(data.room_id, data.room_name);
+    server.emit_to_room(
+      "users_update",
+      {
+        users: server.room.users,
+        user_name: server.user.name
+      }
+    )
   });
 
   socket.on("room_connection", data => {
     console.log("Room connection order received on server : " + data.room_id + " from user : " + data.user_id);
 
-    if (data.room_id in rooms){
-      rooms[data.room_id].push({
-        'user_id': data.user_id,
-        'user_name': data.user_name
-      })
+    let room = get_room(data.room_id)
+    if (room){
+      server.user.update_name(data.user_name);
+      server.set_room(room);
+      server.join_room();
+      server.emit_to_user(
+        "room_connection",
+        {
+          room_id: server.room.id,
+          room_name: server.room.name,
+          user_id: server.user.id,
+          user_name: server.user.name
+        }
+      )
 
-      users[data.user_id] = data.room_id;
-      socket.join(data.room_id);
+      server.emit_to_room(
+        "users_update",
+        {
+          users: server.room.users,
+          user_name: server.user.name
+        }
+      )
 
-      socket.emit("room_connection", {
-        room_id: data.room_id,
-        room_name: names[data.room_id],
-        user_id: data.user_id,
-        user_name: data.user_name
-      });
-
-      io.to(data.room_id).emit("users_update", { users: rooms[data.room_id], user_name: data.user_name });
     }
-
     else {
 
       console.log("No room found with this id. Abort");
-      socket.emit("room_unknown", { room_id: data.room_id });
+      server.emit_to_user("room_unknown", { room_id: data.room_id });
 
     }
   });

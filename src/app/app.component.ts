@@ -28,10 +28,16 @@ export class AppComponent implements OnInit{
       log: 'Duplicated user found. Connection needs to be aborted'
     },
     {
-      event_name: 'user_disconnection',
+      event_name: 'user_disconnected',
       callback: this.lobby.update_users.bind(this.lobby),
       args: ['users'],
       log: 'A user has logged out of the application'
+    },
+    {
+      event_name: 'user_kicked_out',
+      callback: this.lobby.update_users.bind(this.lobby),
+      args: ['users'],
+      log: 'A user has been kicked out of the room'
     },
     {
       event_name: 'users_update',

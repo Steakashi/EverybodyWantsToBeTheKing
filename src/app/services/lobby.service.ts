@@ -10,7 +10,6 @@ import {ExecutionPileService} from './execution-pile.service';
 const PENDING = 'PENDING';
 const PROCESSING = 'PROCESSING';
 const CONNECTED = 'CONNECTED';
-const DISCONNECTED = 'DISCONNECTED';
 const BLOCKED = 'BLOCKED';
 const ERROR = 'ERROR';
 
@@ -18,10 +17,8 @@ const ERROR = 'ERROR';
 @Injectable()
 export class LobbyService{
   title: string;
-  userID: string;
-  userName: string;
-  roomID: string;
-  roomName: string;
+  user = {name: undefined, id: undefined};
+  room = {name: undefined, id: undefined};
   users = [];
   state: string = null;
 
@@ -36,15 +33,15 @@ export class LobbyService{
   }
 
   set_room_id_from_url(roomID){
-    this.roomID = roomID;
+    this.room.id = roomID;
   }
 
   get_user_id(){
-    return this.userID;
+    return this.user.id;
   }
 
   get_current_room_name(){
-    return this.roomName;
+    return this.room.name;
   }
 
   connection_is_allowed(){
@@ -88,7 +85,7 @@ export class LobbyService{
       'room_creation',
       {
         action: 'room_creation',
-        user_id: this.userID,
+        user_id: this.user.id,
         user_name: userName,
         room_id: uuid.v4(),
         room_name: roomName,
@@ -102,9 +99,9 @@ export class LobbyService{
       'room_connection',
       {
         action: 'room_connection',
-        user_id: this.userID,
-        user_name: this.userName !== undefined ? this.userName : 'randomName',
-        room_id: this.roomID,
+        user_id: this.user.id,
+        user_name: this.user.name !== undefined ? this.user.name : 'randomName',
+        room_id: this.room.id,
       }
     );
   }
@@ -114,48 +111,49 @@ export class LobbyService{
       'user_update',
       {
         action: 'user_update',
-        user_id: this.userID,
+        user_id: this.user.id,
         user_name: userName,
-        room_id: this.roomID,
+        room_id: this.room.id,
       }
     );
   }
 
   navigate_to_lobby(userName, roomID){
-    this.roomID = roomID;
-    this.userName = userName;
-    this.router.navigate(['room/' + this.roomID]).then(() => { this.emit_room_order_connection(); });
+    this.room.id = roomID;
+    this.user.name = userName;
+    this.router.navigate(['room/' + this.room.id]).then(() => { this.emit_room_order_connection(); });
   }
 
   create_room(roomName, roomID, userName){
-    this.roomName = roomName;
-    this.roomID = roomID;
-    this.userName = userName;
+    this.room.name = roomName;
+    this.room.id = roomID;
+    this.user.name = userName;
     this.users.push({
-      user_name: this.userName,
-      user_id: this.userID
+      user_name: this.user.name,
+      user_id: this.user.id
     });
-    this.router.navigate(['room/' + this.roomID]).then(() => { this.validate_connection(); });
+    this.router.navigate(['room/' + this.room.id]).then(() => { this.validate_connection(); });
   }
 
   join_room(roomID, roomName, userID, userName){
-    this.roomID = roomID;
-    this.roomName = roomName;
-    this.userName = userName;
+    this.room.id = roomID;
+    this.room.name = roomName;
+    this.user.id = userID;
+    this.user.name = userName;
     this.validate_connection();
   }
 
   connect_user(){
     const retrievedID = this.cookie.get(this.title);
     if ((retrievedID === '') || (retrievedID === undefined) || (retrievedID === null)){
-      this.userID = uuid.v4();
-      this.cookie.set(this.title, this.userID);
+      this.user.id = uuid.v4();
+      this.cookie.set(this.title, this.user.id);
     }
     else{
-      this.userID = retrievedID;
+      this.user.id = retrievedID;
     }
 
-    return this.userID;
+    return this.user.id;
   }
 
 
@@ -163,8 +161,8 @@ export class LobbyService{
     this.users = users;
   }
 
-  update_user(userName){
-    this.userName = userName;
+  update_user(user){
+    this.user = user;
   }
 
 }
