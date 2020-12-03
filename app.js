@@ -53,7 +53,7 @@ class ServerInstance{
 
   constructor(socket) {
     this.socket = socket;
-    console.log("User connected on socket " + socket.id);
+    console.log("Socket generated with id " + socket.id);
   }
 
   emit(event_name, data={}){
@@ -153,6 +153,7 @@ io.on("connection", socket => {
     }
     else{
       server.generate_user(data.user_id);
+      console.log("User connected with id : " + data.user_id)
       server.emit_to_user('user_connection_confirmed');
     }
   });
@@ -167,6 +168,17 @@ io.on("connection", socket => {
       room_users = server.room.users
       delete_room(server.room);
       if (server.room.users.length === 0){ server.delete_room() }
+      else
+      { 
+        server.emit_to_room(
+          "user_disconnected",
+          {
+            room_id: room_id,
+            user_id: user_id,
+            users: room_users
+          }
+        );
+      }
 
     } else {
       room_id = undefined;
@@ -175,15 +187,7 @@ io.on("connection", socket => {
 
     user_id = server.user.id
     delete_user(server.user)
-
-    server.emit(
-      "user_disconnected",
-      {
-        room_id: room_id,
-        user_id: user_id,
-        users: room_users
-      }
-    );
+  
   });
 
   socket.on("user_update", data => {
