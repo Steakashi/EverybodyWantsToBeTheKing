@@ -1,13 +1,20 @@
 let app = require("express")();
 let http = require("http").Server(app);
 let io = require("socket.io")(http);
+const { disconnect } = require("process");
+const { BlockScopeAwareRuleWalker } = require("tslint");
+const { resolveTripleslashReference } = require("typescript");
 const { v4: uuidv4 } = require('uuid');
 
 
 var rooms = []
 var users = []
-var names = []
-var sockets = []
+
+
+const TIMEOUT = 30000;
+const STATUS_UNKNOWN = "unknown"
+const STATUS_CONNECTED = "connected"
+const STATUS_DISCONNECTED = "disconnected"
 
 
 function _is_not_empty(object){
@@ -24,8 +31,17 @@ function get_room(room_id){
 }
 
 function get_user(id){
+  /*
   if (id in users){ return users[id]; }
   else { return null; }
+  */
+ var user_found = null;
+  users.forEach(element => {
+    if (element.id === id) {
+      user_found = element;
+    }
+  });
+  return user_found;
 }
 
 function delete_user(user){
@@ -49,7 +65,7 @@ class ServerInstance{
   socket;
   user;
   room;
-
+  status;
 
   constructor(socket) {
     this.socket = socket;
@@ -71,6 +87,10 @@ class ServerInstance{
   generate_user(user_id){
     this.user = new User(user_id);
     users.push(this.user);
+  }
+
+  set_status(status){
+    this.user.status = status
   }
 
   set_room(room){
@@ -108,6 +128,7 @@ class User{
   constructor(id, name=""){
     this.id = id;
     this.name = name;
+    this.status = STATUS_UNKNOWN;
   }
 
   update_name(name){
@@ -147,52 +168,88 @@ io.on("connection", socket => {
   server.emit_to_user('user_connection');
 
   socket.on('user_connection', data => {
-    if (get_user(data.user_id)){
-      console.log("Warning : multiple connection from single user detected");
-      server.emit_to_user('user_duplicated');
+    user = get_user(data.user_id)
+    if (user){
+      if (user.status == STATUS_DISCONNECTED)
+      {
+        console.log("User with id " + server.user.id +  " has correctly reconnected");
+        server.set_status(STATUS_DISCONNECTED);
+        server.emit_to_room(
+          "users_update",
+          {
+            users: server.room.users,
+            user_name: server.user.name
+          }
+        );
+      }
+      else
+      {
+        console.log("Warning : multiple connection from single user detected");
+        server.emit_to_user('user_duplicated');  
+      }
     }
     else{
       server.generate_user(data.user_id);
-      console.log("User connected with id : " + data.user_id)
+      console.log("User connected with id " + data.user_id)
+      server.set_status(STATUS_CONNECTED);
       server.emit_to_user('user_connection_confirmed');
     }
   });
 
   socket.on("disconnect", function() {
-    console.log("User with id " + server.user.id +  " disconnected");
-    user_id = server.user.id;
+    console.log("User with id " + server.user.id +  " disconnected. Waiting " + TIMEOUT + "ms for reconnection...");
+    server.set_status(STATUS_DISCONNECTED);
+    console.log(server.room.users);
+    server.emit_to_room(
+      "users_update",
+      {
+        users: server.room.users,
+        user_name: server.user.name
+      }
+    );
 
-    if (server.room !== undefined){
-      server.room.remove_user(server.user);
-      room_id = server.room.id;
-      room_users = server.room.users
-      delete_room(server.room);
-      if (server.room.users.length === 0){ server.delete_room() }
-      else
-      { 
-        server.emit_to_room(
-          "user_disconnected",
-          {
-            room_id: room_id,
-            user_id: user_id,
-            users: room_users
-          }
-        );
+    setTimeout(function(){ 
+
+      console.log("User with id " + server.user.id + " has not reconnected. Deletion in progress")
+      user_id = server.user.id;
+
+      if (server.room !== undefined){
+        server.room.remove_user(server.user);
+        room_id = server.room.id;
+        room_users = server.room.users
+        delete_room(server.room);
+        if (server.room.users.length === 0){ server.delete_room() }
+        else
+        { 
+          server.emit_to_room(
+            "user_disconnected",
+            {
+              room_id: room_id,
+              user_id: user_id,
+              users: room_users
+            }
+          );
+        }
+
+      } else {
+        room_id = undefined;
+        room_users = [];
       }
 
-    } else {
-      room_id = undefined;
-      room_users = [];
-    }
+      user_id = server.user.id
+      delete_user(server.user)
 
-    user_id = server.user.id
-    delete_user(server.user)
+      console.log("User with id " + server.user.id + " has been successfully deleted")
+    }, TIMEOUT);
+    
+    
   
   });
 
   socket.on("user_update", data => {
     console.log("User update order received on server : " + data.room_id)
-    get_user(data.user_id).update(data.user_name);
+    user = get_user(data.user_id);
+    user.update_name(data.user_name);
     server.emit_to_room(
       "users_update",
       {
