@@ -7,11 +7,12 @@ const { resolveTripleslashReference } = require("typescript");
 const { v4: uuidv4 } = require('uuid');
 
 
+var instances = []
 var rooms = []
 var users = []
 
 
-const TIMEOUT = 30000;
+const TIMEOUT = 3000;
 const STATUS_UNKNOWN = "unknown"
 const STATUS_CONNECTED = "connected"
 const STATUS_DISCONNECTED = "disconnected"
@@ -21,6 +22,15 @@ function _is_not_empty(object){
   return (!(Object.keys(object).length === 0 && object.constructor === Object));
 }
 
+function get_server_instance(id){
+  var instance_found = null;
+  instances.forEach(element => {
+    if (element.user.id === id) {
+      instance_found = element;
+    }
+  });
+  return instance_found;
+}
 
 function get_room(room_id){
   var room_found = null;
@@ -66,6 +76,7 @@ class ServerInstance{
   user;
   room;
   status;
+  timeout;
 
   constructor(socket) {
     this.socket = socket;
@@ -104,6 +115,14 @@ class ServerInstance{
 
   delete_room(){
     delete this.room;
+  }
+
+  register_timeout(timeout){
+    this.timeout = timeout
+  }
+
+  delete_timeout(){
+    clearTimeout(this.timeout)
   }
 
   generate_room(room_id, room_name){
@@ -164,23 +183,38 @@ class Room{
 
 
 io.on("connection", socket => {
-  const server = new ServerInstance(socket);
-  server.emit_to_user('user_connection');
+  var server = undefined;
+  socket.emit('user_connection');
 
   socket.on('user_connection', data => {
+    server = new ServerInstance(socket);
     user = get_user(data.user_id)
     if (user){
       if (user.status == STATUS_DISCONNECTED)
       {
+        server = get_server_instance(data.user_id);
+        server.socket = socket;
         console.log("User with id " + server.user.id +  " has correctly reconnected");
-        server.set_status(STATUS_DISCONNECTED);
+        server.set_status(STATUS_CONNECTED);
+        server.socket.join(server.room.id);
+        server.delete_timeout();
+        server.emit_to_user(
+          "room_connection",
+          {
+            room_id: server.room.id,
+            room_name: server.room.name,
+            user_id: server.user.id,
+            user_name: server.user.name
+          }
+        )
+  
         server.emit_to_room(
           "users_update",
           {
             users: server.room.users,
             user_name: server.user.name
           }
-        );
+        )
       }
       else
       {
@@ -189,6 +223,7 @@ io.on("connection", socket => {
       }
     }
     else{
+      instances.push(server);
       server.generate_user(data.user_id);
       console.log("User connected with id " + data.user_id)
       server.set_status(STATUS_CONNECTED);
@@ -199,7 +234,6 @@ io.on("connection", socket => {
   socket.on("disconnect", function() {
     console.log("User with id " + server.user.id +  " disconnected. Waiting " + TIMEOUT + "ms for reconnection...");
     server.set_status(STATUS_DISCONNECTED);
-    console.log(server.room.users);
     server.emit_to_room(
       "users_update",
       {
@@ -208,41 +242,43 @@ io.on("connection", socket => {
       }
     );
 
-    setTimeout(function(){ 
+    server.register_timeout(
+      setTimeout(function(){ 
 
-      console.log("User with id " + server.user.id + " has not reconnected. Deletion in progress")
-      user_id = server.user.id;
-
-      if (server.room !== undefined){
-        server.room.remove_user(server.user);
-        room_id = server.room.id;
-        room_users = server.room.users
-        delete_room(server.room);
-        if (server.room.users.length === 0){ server.delete_room() }
-        else
-        { 
-          server.emit_to_room(
-            "user_disconnected",
-            {
-              room_id: room_id,
-              user_id: user_id,
-              users: room_users
-            }
-          );
+        console.log("User with id " + server.user.id + " has not reconnected. Deletion in progress")
+        user_id = server.user.id;
+  
+        if (server.room !== undefined){
+          server.room.remove_user(server.user);
+          room_id = server.room.id;
+          room_users = server.room.users
+          if (server.room.users.length === 0){ 
+            delete_room(server.room);
+            server.delete_room() 
+          }
+          else
+          { 
+            server.emit_to_room(
+              "user_disconnected",
+              {
+                room_id: room_id,
+                user_id: user_id,
+                users: room_users
+              }
+            );
+          }
+  
+        } else {
+          room_id = undefined;
+          room_users = [];
         }
-
-      } else {
-        room_id = undefined;
-        room_users = [];
-      }
-
-      user_id = server.user.id
-      delete_user(server.user)
-
-      console.log("User with id " + server.user.id + " has been successfully deleted")
-    }, TIMEOUT);
-    
-    
+  
+        user_id = server.user.id
+        delete_user(server.user)
+  
+        console.log("User with id " + server.user.id + " has been successfully deleted")
+      }, TIMEOUT)
+    );
   
   });
 

@@ -136,6 +136,7 @@ export class LobbyService{
   }
 
   join_room(roomID, roomName, userID, userName){
+    console.log('JOIN ROOM');
     this.room.id = roomID;
     this.room.name = roomName;
     this.user.id = userID;
@@ -158,6 +159,7 @@ export class LobbyService{
 
 
   update_users(users){
+    console.log("UPDATING USRS");
     this.users = users;
   }
 
