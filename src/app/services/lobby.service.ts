@@ -157,7 +157,6 @@ export class LobbyService{
     return this.user.id;
   }
 
-
   update_users(users){
     console.log("UPDATING USRS");
     this.users = users;

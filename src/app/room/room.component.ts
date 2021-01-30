@@ -19,7 +19,6 @@ export class RoomComponent implements OnInit {
 
   ngOnInit(): void {
     if (!this.lobby.is_waiting_order()){
-      console.log("EMIT ROOM ORDER CONENCTION in room")
       this.lobby.set_room_id_from_url(this.route.snapshot.params.id);
       this.executionPile.register(this.lobby.emit_room_order_connection.bind(this.lobby));
     }
@@ -43,7 +42,6 @@ export class RoomComponent implements OnInit {
   }
 
   get_room_users() {
-    console.log(this.lobby.users);
     return this.lobby.users;
   }
 

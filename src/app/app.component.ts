@@ -68,7 +68,7 @@ export class AppComponent implements OnInit{
       callback: this.lobby.invalidate_connection.bind(this.lobby),
       args: [],
       log: 'A user tried to join a room, but no one has been found from given id'
-    },
+    }
   ];
 
   constructor(private wsService: WebsocketService,
