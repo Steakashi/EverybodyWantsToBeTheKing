@@ -37,12 +37,20 @@ export class RoomComponent implements OnInit {
     return this.lobby.user.name;
   }
 
-  update_player_name(userName){
-    this.lobby.emit_user_update(userName);
-  }
-
   get_room_users() {
     return this.lobby.users;
+  }
+
+  update_player_name(userName){
+    this.lobby.emit_user_order_update(userName);
+  }
+
+  has_enough_players() {
+    return this.lobby.users.length >= 2;
+  }
+
+  launch_game() {
+    this.lobby.emit_game_order_creation()
   }
 
 }

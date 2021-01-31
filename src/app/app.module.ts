@@ -14,6 +14,7 @@ import { LobbyService } from './services/lobby.service';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { RoomComponent } from './room/room.component';
+import { GameComponent } from './game/game.component';
 
 
 const appRoutes: Routes = [
@@ -29,7 +30,8 @@ const appRoutes: Routes = [
   declarations: [
     AppComponent,
     HomeComponent,
-    RoomComponent
+    RoomComponent,
+    GameComponent
   ],
   imports: [
     BrowserModule,

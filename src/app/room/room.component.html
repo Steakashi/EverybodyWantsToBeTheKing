@@ -15,6 +15,9 @@
   <ul *ngIf="get_room_users()">
     <li *ngFor="let user of get_room_users()">{{ user.name }} ({{ user.id }}) ({{ user.status }})</li>
   </ul>
+
+  <button (click)="launch_game()" [disabled]="!has_enough_players()">Launch game</button>
+
 </div>
 <div *ngIf="get_lobby_state()=='ERROR'">
   <p>Aucune salle trouvée avec cette ID. Quelqu'un semble s'être joué de vous...</p>

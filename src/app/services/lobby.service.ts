@@ -106,7 +106,7 @@ export class LobbyService{
     );
   }
 
-  emit_user_update(userName){
+  emit_user_order_update(userName){
     this.wsService.emit(
       'user_update',
       {
@@ -116,6 +116,10 @@ export class LobbyService{
         room_id: this.room.id,
       }
     );
+  }
+
+  emit_game_order_creation(){
+    console.log('emit order');
   }
 
   navigate_to_lobby(userName, roomID){
@@ -136,7 +140,6 @@ export class LobbyService{
   }
 
   join_room(roomID, roomName, userID, userName){
-    console.log('JOIN ROOM');
     this.room.id = roomID;
     this.room.name = roomName;
     this.user.id = userID;
@@ -158,7 +161,6 @@ export class LobbyService{
   }
 
   update_users(users){
-    console.log("UPDATING USRS");
     this.users = users;
   }
 
