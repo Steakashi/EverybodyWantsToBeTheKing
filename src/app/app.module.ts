@@ -16,6 +16,9 @@ import { RouterModule, Routes } from '@angular/router';
 import { RoomComponent } from './room/room.component';
 import { GameComponent } from './game/game.component';
 
+import {
+  MatButtonModule,
+} from '@angular/material/button'
 
 const appRoutes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -35,6 +38,7 @@ const appRoutes: Routes = [
   ],
   imports: [
     BrowserModule,
+    MatButtonModule,
     FormsModule,
     RouterModule.forRoot(appRoutes),
     BrowserAnimationsModule,
