@@ -19,11 +19,15 @@ import { GameComponent } from './game/game.component';
 import {
   MatButtonModule,
 } from '@angular/material/button'
+import { PlayerService } from './services/player.service';
+import { GameService } from './services/game.service';
 
 const appRoutes: Routes = [
   { path: 'home', component: HomeComponent },
   { path: 'room', canActivate: [AuthGuardService], component: RoomComponent },
   { path: 'room/:id', canActivate: [AuthGuardService], component: RoomComponent },
+  { path: 'game', canActivate: [AuthGuardService], component: GameComponent },
+  { path: 'game/:id', canActivate: [AuthGuardService], component: GameComponent },
   { path: '', component: HomeComponent },
   { path: 'not-found', component: HomeComponent },
   { path: '**', redirectTo: 'not-found' }
@@ -48,6 +52,8 @@ const appRoutes: Routes = [
     LogService,
     AuthGuardService,
     WebsocketService,
+    GameService,
+    PlayerService,
     LobbyService,
     CookieService
   ],

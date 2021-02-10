@@ -12,7 +12,7 @@ var rooms = []
 var users = []
 
 
-const TIMEOUT = 3000;
+const TIMEOUT = 30000;
 const STATUS_UNKNOWN = "unknown"
 const STATUS_CONNECTED = "connected"
 const STATUS_DISCONNECTED = "disconnected"
@@ -41,11 +41,7 @@ function get_room(room_id){
 }
 
 function get_user(id){
-  /*
-  if (id in users){ return users[id]; }
-  else { return null; }
-  */
- var user_found = null;
+  var user_found = null;
   users.forEach(element => {
     if (element.id === id) {
       user_found = element;
@@ -196,25 +192,29 @@ io.on("connection", socket => {
         server.socket = socket;
         console.log("User with id " + server.user.id +  " has correctly reconnected");
         server.set_status(STATUS_CONNECTED);
-        server.socket.join(server.room.id);
         server.delete_timeout();
-        server.emit_to_user(
-          "room_connection",
-          {
-            room_id: server.room.id,
-            room_name: server.room.name,
-            user_id: server.user.id,
-            user_name: server.user.name
-          }
-        )
-  
-        server.emit_to_room(
-          "users_update",
-          {
-            users: server.room.users,
-            user_name: server.user.name
-          }
-        )
+
+        if (server.room !== undefined)
+        {
+          server.socket.join(server.room.id);
+          server.emit_to_user(
+            "room_connection",
+            {
+              room_id: server.room.id,
+              room_name: server.room.name,
+              user_id: server.user.id,
+              user_name: server.user.name
+            }
+          )
+    
+          server.emit_to_room(
+            "users_update",
+            {
+              users: server.room.users,
+              user_name: server.user.name
+            }
+          )
+        };
       }
       else
       {
@@ -234,13 +234,15 @@ io.on("connection", socket => {
   socket.on("disconnect", function() {
     console.log("User with id " + server.user.id +  " disconnected. Waiting " + TIMEOUT + "ms for reconnection...");
     server.set_status(STATUS_DISCONNECTED);
-    server.emit_to_room(
-      "users_update",
-      {
-        users: server.room.users,
-        user_name: server.user.name
-      }
-    );
+    if (server.room !== undefined){
+      server.emit_to_room(
+        "users_update",
+        {
+          users: server.room.users,
+          user_name: server.user.name
+        }
+      )
+    };
 
     server.register_timeout(
       setTimeout(function(){ 
@@ -283,7 +285,7 @@ io.on("connection", socket => {
   });
 
   socket.on("user_update", data => {
-    console.log("User update order received on server : " + data.room_id)
+    console.log("User update order received on room : " + data.room_id)
     user = get_user(data.user_id);
     user.update_name(data.user_name);
     server.emit_to_room(
@@ -300,7 +302,7 @@ io.on("connection", socket => {
   })
 
   socket.on("room_creation", data => {
-    console.log("Room creation order received on server : " + data.room_id);
+    console.log("Room creation order received on room : " + data.room_id);
     server.user.update_name(data.user_name);
     server.generate_room(data.room_id, data.room_name);
     server.emit_to_room(
@@ -313,7 +315,7 @@ io.on("connection", socket => {
   });
 
   socket.on("room_connection", data => {
-    console.log("Room connection order received on server : " + data.room_id + " from user : " + data.user_id);
+    console.log("Room connection order received on room : " + data.room_id + " from user : " + data.user_id);
 
     let room = get_room(data.room_id)
     if (room){
@@ -346,6 +348,11 @@ io.on("connection", socket => {
 
     }
   });
+
+  socket.on("game_launch", data => {
+    console.log("Game launch order received on room : " + server.room.id + " from user : " + server.user.id);
+    server.emit_to_room("game_launch", {});
+  })
 });
 
 

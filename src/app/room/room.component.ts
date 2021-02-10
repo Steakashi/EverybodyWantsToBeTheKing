@@ -50,7 +50,7 @@ export class RoomComponent implements OnInit {
   }
 
   launch_game() {
-    this.lobby.emit_game_order_creation()
+    this.lobby.emit_game_order_launch();
   }
 
 }

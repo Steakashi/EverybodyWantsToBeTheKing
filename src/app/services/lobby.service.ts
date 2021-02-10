@@ -40,6 +40,10 @@ export class LobbyService{
     return this.user.id;
   }
 
+  get_user_name(){
+    return this.user.name;
+  }
+
   get_current_room_name(){
     return this.room.name;
   }
@@ -77,6 +81,10 @@ export class LobbyService{
   confirm_connection(){
     this.state = this.executionPile.is_empty() ? PENDING : PROCESSING;
     this.executionPile.process();
+  }
+
+  launch_game(){
+    this.router.navigate(['game/' + this.room.id]);
   }
 
   emit_room_order_creation(userName, roomName) {
@@ -118,8 +126,8 @@ export class LobbyService{
     );
   }
 
-  emit_game_order_creation(){
-    console.log('emit order');
+  emit_game_order_launch(){
+    this.wsService.emit('game_launch',{});
   }
 
   navigate_to_lobby(userName, roomID){

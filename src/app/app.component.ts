@@ -68,6 +68,12 @@ export class AppComponent implements OnInit{
       callback: this.lobby.invalidate_connection.bind(this.lobby),
       args: [],
       log: 'A user tried to join a room, but no one has been found from given id'
+    },
+    {
+      event_name: 'game_launch',
+      callback: this.lobby.launch_game.bind(this.lobby),
+      args: [],
+      log: 'User has launched a game'
     }
   ];
 
