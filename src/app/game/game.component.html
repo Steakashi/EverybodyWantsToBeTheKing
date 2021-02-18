@@ -3,3 +3,10 @@
 <ul>
     <li>{{ get_player_popularity() }}</li>
 </ul>
+
+<p>{{ timeLeft }}</p>
+
+<h5>Actions</h5>
+<ul>
+    <li *ngFor="let action of get_actions()"><button (click)="register_action(action)">{{ action.name }}</button></li>
+</ul>
