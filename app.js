@@ -13,9 +13,11 @@ var users = []
 
 
 const TIMEOUT = 30000;
-const STATUS_UNKNOWN = "unknown"
-const STATUS_CONNECTED = "connected"
-const STATUS_DISCONNECTED = "disconnected"
+const STATUS_UNKNOWN = "unknown";
+const STATUS_CONNECTED = "connected";
+const STATUS_DISCONNECTED = "disconnected";
+const STATUS_PLAYING = "waiting";
+const STATUS_READY = "ready";
 
 
 function _is_not_empty(object){
@@ -35,7 +37,7 @@ function get_server_instance(id){
 function get_room(room_id){
   var room_found = null;
   rooms.forEach(room => {
-    if (room.id === room_id){ console.log(room); room_found = room; }
+    if (room.id === room_id){ room_found = room; }
   })
   return room_found;
 }
@@ -65,7 +67,6 @@ function delete_room(room){
     }
   });
 }
-
 
 class ServerInstance{
   socket;
@@ -150,6 +151,14 @@ class User{
     this.name = name;
   }
 
+  begin_turn(){
+    this.status = STATUS_PLAYING;
+  }
+
+  end_turn(){
+    this.status = STATUS_READY;
+  }
+
 }
 
 class Room{
@@ -173,6 +182,27 @@ class Room{
         this.users.splice(this.users.indexOf(element), 1);
       }
     });
+  }
+
+  begin_turn(){
+    this.users.forEach(user => {
+      user.begin_turn();
+    });
+  }
+
+  end_turn(){
+    this.users.forEach(user => {
+      user.end_turn();
+    });
+  }
+
+  are_players_ready(){
+    for(var i = 0; i < users.length; i++) {
+      if (users[i].status === STATUS_PLAYING) {
+        return false;
+      };
+    };
+    return true;
   }
 
 }
@@ -330,7 +360,7 @@ io.on("connection", socket => {
           user_id: server.user.id,
           user_name: server.user.name
         }
-      )
+      );
 
       server.emit_to_room(
         "users_update",
@@ -338,7 +368,7 @@ io.on("connection", socket => {
           users: server.room.users,
           user_name: server.user.name
         }
-      )
+      );
 
     }
     else {
@@ -351,7 +381,34 @@ io.on("connection", socket => {
 
   socket.on("game_launch", data => {
     console.log("Game launch order received on room : " + server.room.id + " from user : " + server.user.id);
-    server.emit_to_room("game_launch", {});
+    server.room.begin_turn()
+    server.emit_to_room(
+      "game_launch", 
+      {
+        users: server.room.users,
+      }
+    );
+  });
+
+  socket.on("turn_end", data => {
+    console.log("[Room " + server.room.id + "] Player with id " + server.user.id + " has ended his turn.")
+    server.user.end_turn();
+    if (server.room.are_players_ready()){
+      server.emit_to_room(
+        "begin_action",
+        {
+          users: server.room.users,
+        })
+    }
+    else
+    {
+      server.emit_to_room(
+        "users_update",
+        {
+          users: server.room.users,
+        }
+      );
+    }
   })
 });
 

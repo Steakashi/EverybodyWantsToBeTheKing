@@ -83,7 +83,8 @@ export class LobbyService{
     this.executionPile.process();
   }
 
-  launch_game(){
+  launch_game(users){
+    this.update_users(users);
     this.router.navigate(['game/' + this.room.id]);
   }
 
@@ -130,6 +131,11 @@ export class LobbyService{
     this.wsService.emit('game_launch',{});
   }
 
+
+  emit_turn_end(){
+    this.wsService.emit('turn_end',{});
+  }
+
   navigate_to_lobby(userName, roomID){
     this.room.id = roomID;
     this.user.name = userName;
@@ -174,6 +180,10 @@ export class LobbyService{
 
   update_user(user){
     this.user = user;
+  }
+
+  begin_action(users){
+    this.update_users(users);
   }
 
 }

@@ -72,8 +72,14 @@ export class AppComponent implements OnInit{
     {
       event_name: 'game_launch',
       callback: this.lobby.launch_game.bind(this.lobby),
-      args: [],
+      args: ['users'],
       log: 'User has launched a game'
+    },
+    {
+      event_name: 'begin_action',
+      callback: this.lobby.begin_action.bind(this.lobby),
+      args: ['users'],
+      log: 'All users has chosen an action'
     }
   ];
 

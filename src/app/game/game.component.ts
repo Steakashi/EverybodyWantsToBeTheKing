@@ -3,6 +3,12 @@ import { LobbyService } from '../services/lobby.service';
 import { GameService } from '../services/game.service';
 
 
+const TURNTIME = 60;
+const PROCESSING = 'PROCESSING';
+const CHOOSING = 'CHOOSING';
+const RESULTS = 'RESULTS';
+
+
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -14,14 +20,17 @@ export class GameComponent implements OnInit {
 
   constructor(private lobby: LobbyService,
               private game: GameService) { }
-
-  TURNTIME = 10;
+  
+              
   turnEnded = false;
-  timeLeft = this.TURNTIME;
+  timeLeft = TURNTIME;
   timer: any;
+  gamestate: string;
+
 
   ngOnInit(): void {
     this.game.initialize(this.lobby.get_user_name());
+    this.gamestate = CHOOSING;
     this.begin_turn();
   }
 
@@ -39,6 +48,10 @@ export class GameComponent implements OnInit {
 
   get_player_popularity(){
     return this._get_player_data().popularity;
+  }
+
+  get_room_users() {
+    return this.lobby.users;
   }
   
   register_action(action){
@@ -59,6 +72,8 @@ export class GameComponent implements OnInit {
 
   end_turn(){
     this.turnEnded = true;
+    this.lobby.emit_turn_end();
+    this.gamestate = PROCESSING;
     console.log('timer ended');
   }
 

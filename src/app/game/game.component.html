@@ -4,9 +4,21 @@
     <li>{{ get_player_popularity() }}</li>
 </ul>
 
-<p>{{ timeLeft }}</p>
 
-<h5>Actions</h5>
-<ul>
-    <li *ngFor="let action of get_actions()"><button (click)="register_action(action)">{{ action.name }}</button></li>
-</ul>
+<div *ngIf="gamestate==CHOOSING">
+    <h6>Players</h6>
+    <ul *ngIf="get_room_users()">
+        <li *ngFor="let user of get_room_users()">{{ user.name }} ({{ user.id }}) ({{ user.status }})</li>
+    </ul>
+
+    <h6>Timer</h6>
+    <p>{{ timeLeft }}</p>
+
+    <h5>Actions</h5>
+    <ul>
+        <li *ngFor="let action of get_actions()"><button (click)="register_action(action)">{{ action.name }}</button></li>
+    </ul>
+</div>
+
+<div *ngIf="gamestate==PROCESSING"></div>
+
