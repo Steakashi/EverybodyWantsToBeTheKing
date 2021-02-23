@@ -13,6 +13,7 @@ var users = []
 
 
 const TIMEOUT = 30000;
+const TURNTIME = 60;
 const STATUS_UNKNOWN = "unknown";
 const STATUS_CONNECTED = "connected";
 const STATUS_DISCONNECTED = "disconnected";
@@ -24,10 +25,10 @@ function _is_not_empty(object){
   return (!(Object.keys(object).length === 0 && object.constructor === Object));
 }
 
-function get_server_instance(id){
+function get_server_instance(user_id){
   var instance_found = null;
   instances.forEach(element => {
-    if (element.user.id === id) {
+    if (element.user.id === user_id) {
       instance_found = element;
     }
   });
@@ -66,6 +67,20 @@ function delete_room(room){
       rooms.splice(rooms.indexOf(element), 1);
     }
   });
+}
+
+function begin_actions(server){
+  console.log("[Room " + server.room.id + "] All players have chosen an action.")
+  server.room.delete_interval()
+  server.room.delete_turn_end();
+  server.emit_to_room(
+    "begin_action",
+    {
+      users: server.room.users,
+    }
+  );
+  server.room.sort_players();
+  server.room.process_pile();
 }
 
 class ServerInstance{
@@ -115,11 +130,11 @@ class ServerInstance{
   }
 
   register_timeout(timeout){
-    this.timeout = timeout
+    this.timeout = timeout;
   }
 
   delete_timeout(){
-    clearTimeout(this.timeout)
+    clearTimeout(this.timeout);
   }
 
   generate_room(room_id, room_name){
@@ -141,10 +156,26 @@ class ServerInstance{
 
 class User{
 
-  constructor(id, name=""){
+  id;
+  name;
+  status;
+  popularity;
+  agility;
+  action;
+  room_id;
+  socket_id;
+
+  constructor(id, name){
     this.id = id;
     this.name = name;
     this.status = STATUS_UNKNOWN;
+    this.player = {};
+  }
+
+  synchronize_player(player, action){
+    this.popularity = player.popularity;
+    this.agility = player.agility;
+    this.action = action;
   }
 
   update_name(name){
@@ -159,20 +190,32 @@ class User{
     this.status = STATUS_READY;
   }
 
+  play(){
+    console.log("[Room " + this.room_id + "] Player with id " + this.id + " is now playing")
+    get_server_instance(this.id).emit_to_user('play', this.action);
+  }
+
 }
 
 class Room{
   id;
   name;
   users;
+  game_master;
+  interval;
+  turn_clock;
+  turn_end;
+  pile;
 
   constructor(id, name){
     this.id = id;
     this.name = name;
     this.users = [];
+    this.game_master = undefined;
   }
 
   add_user(user){
+    user.room_id = this.id;
     this.users.push(user)
   }
 
@@ -203,6 +246,33 @@ class Room{
       };
     };
     return true;
+  }
+
+  register_turn_end(turn_end){
+    this.turn_end = turn_end;
+  }
+
+  register_interval(interval){
+    this.turn_clock = TURNTIME;
+    this.interval = interval;
+  }
+
+  delete_turn_end(){
+    clearTimeout(this.turn_end);
+  }
+
+  delete_interval(){
+    clearInterval(this.interval);
+  }
+
+  sort_players(){
+    this.pile = users.map((x) => x);
+    this.pile.sort((p1, p2) => (p1.agility >= p2.agility) ? 1 : -1);
+  }
+
+  process_pile(){
+    this.pile[0].play();
+    this.pile.shift();
   }
 
 }
@@ -380,26 +450,47 @@ io.on("connection", socket => {
   });
 
   socket.on("game_launch", data => {
-    console.log("Game launch order received on room : " + server.room.id + " from user : " + server.user.id);
-    server.room.begin_turn()
-    server.emit_to_room(
-      "game_launch", 
-      {
-        users: server.room.users,
-      }
-    );
+    if (server.room.game_master != undefined){ 
+     console.log("Game launch order received on room : " + server.room.id + ", but similar order has already been received.")
+    }
+    else
+    {
+      console.log("Game launch order received on room : " + server.room.id + " from user : " + server.user.id);
+      server.room.game_master = server.user;
+      server.room.begin_turn()
+      server.room.register_interval(
+        setInterval(
+          function(){
+            server.room.turn_clock--;
+            server.emit_to_room(
+              "turn_clock",
+              {
+                clock: server.room.turn_clock
+              })
+          },1000)
+      )
+      server.room.register_turn_end(
+        setTimeout(
+          function(){ begin_actions(server); },1000 * TURNTIME)
+      )
+      server.emit_to_room(
+        "game_launch", 
+        {
+          users: server.room.users,
+        }
+      );
+    }
+  });
+
+  socket.on("player_synchronization", data => {
+    console.log("[Room " + server.room.id + "] Player with id " + server.user.id + " has synchronized")
+    server.user.synchronize_player(data.player, data.action);
   });
 
   socket.on("turn_end", data => {
-    console.log("[Room " + server.room.id + "] Player with id " + server.user.id + " has ended his turn.")
+    console.log("[Room " + server.room.id + "] Player with id " + server.user.id + " has ended his turn")
     server.user.end_turn();
-    if (server.room.are_players_ready()){
-      server.emit_to_room(
-        "begin_action",
-        {
-          users: server.room.users,
-        })
-    }
+    if (server.room.are_players_ready()){ begin_actions(server); }
     else
     {
       server.emit_to_room(

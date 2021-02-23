@@ -131,9 +131,12 @@ export class LobbyService{
     this.wsService.emit('game_launch',{});
   }
 
-
   emit_turn_end(){
     this.wsService.emit('turn_end',{});
+  }
+
+  emit_player_synchronization(player, action){
+    this.wsService.emit('player_synchronization', {'player': player, 'action': action});
   }
 
   navigate_to_lobby(userName, roomID){
@@ -180,10 +183,6 @@ export class LobbyService{
 
   update_user(user){
     this.user = user;
-  }
-
-  begin_action(users){
-    this.update_users(users);
   }
 
 }

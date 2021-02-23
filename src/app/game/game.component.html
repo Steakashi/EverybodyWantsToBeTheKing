@@ -5,14 +5,14 @@
 </ul>
 
 
-<div *ngIf="gamestate==CHOOSING">
+<div *ngIf="gamestate=='CHOOSING'">
     <h6>Players</h6>
     <ul *ngIf="get_room_users()">
         <li *ngFor="let user of get_room_users()">{{ user.name }} ({{ user.id }}) ({{ user.status }})</li>
     </ul>
 
     <h6>Timer</h6>
-    <p>{{ timeLeft }}</p>
+    <p>{{ get_clock() }}</p>
 
     <h5>Actions</h5>
     <ul>
@@ -20,5 +20,5 @@
     </ul>
 </div>
 
-<div *ngIf="gamestate==PROCESSING"></div>
+<div *ngIf="gamestate=='PROCESSING'"></div>
 

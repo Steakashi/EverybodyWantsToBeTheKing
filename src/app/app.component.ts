@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 
 
 import {LobbyService} from './services/lobby.service';
+import {GameService} from './services/game.service';
 import {LogService} from './services/log-service.service';
 import {WebsocketService} from './services/websocket.service';
 
@@ -76,16 +77,30 @@ export class AppComponent implements OnInit{
       log: 'User has launched a game'
     },
     {
+      event_name: 'turn_clock',
+      callback: this.game.turn_clock.bind(this.game),
+      args: ['clock'],
+      log: 'Clock received'
+    },
+    {
       event_name: 'begin_action',
-      callback: this.lobby.begin_action.bind(this.lobby),
+      callback: this.game.begin_action.bind(this.game),
       args: ['users'],
       log: 'All users has chosen an action'
-    }
+    },
+    {
+      event_name: 'play',
+      callback: this.game.play.bind(this.game),
+      args: ['action'],
+      log: 'Action is being processed'
+    },
+
   ];
 
   constructor(private wsService: WebsocketService,
               private lobby: LobbyService,
-              private logger: LogService) {}
+              private game: GameService,
+              private logger: LogService,) {}
 
   generate_signal(signalObject){
     this.wsService.listen(signalObject.event_name).subscribe((data) => {

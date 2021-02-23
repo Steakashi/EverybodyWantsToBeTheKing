@@ -21,15 +21,15 @@ export class GameComponent implements OnInit {
   constructor(private lobby: LobbyService,
               private game: GameService) { }
   
-              
+
   turnEnded = false;
   timeLeft = TURNTIME;
   timer: any;
   gamestate: string;
 
-
   ngOnInit(): void {
     this.game.initialize(this.lobby.get_user_name());
+    this.lobby.emit_player_synchronization(this.game.get_player(), this.game.get_action())
     this.gamestate = CHOOSING;
     this.begin_turn();
   }
@@ -53,6 +53,10 @@ export class GameComponent implements OnInit {
   get_room_users() {
     return this.lobby.users;
   }
+
+  get_clock(){
+    return this.game.clock;
+  }
   
   register_action(action){
     this.game.register_action(action);
@@ -61,22 +65,16 @@ export class GameComponent implements OnInit {
   }
 
   begin_turn() {
-    this.timer = setInterval(() => {
-      if(this.timeLeft > 0) {
-        this.timeLeft--;
-      } else {
-        this.end_turn();
-      }
-    },1000)
+    this.game.clock = TURNTIME;
   }
 
   end_turn(){
     this.turnEnded = true;
     this.lobby.emit_turn_end();
-    this.gamestate = PROCESSING;
-    console.log('timer ended');
+    //this.gamestate = PROCESSING;
+    //console.log('timer ended');
   }
 
-
+  
 
 }

@@ -8,6 +8,8 @@ import { ActionManager } from './actions/action-manager.service'
 export class GameService {
 
   actionPile: any = [];
+  action: any;
+  clock: number;
 
   constructor(private player: PlayerService,
               private actionManager: ActionManager) { }
@@ -20,11 +22,27 @@ export class GameService {
     return this.player;
   }
 
+  get_action(){
+    return this.action
+  }
+
   actions(){
     return this.actionManager.get_all_actions();
   }
 
   register_action(action){
-    this.actionPile.push(action);
+    this.action = action;
+  }
+  
+  turn_clock(value){
+    this.clock = value;
+  }
+
+  begin_action(){
+    this.clock = 0;
+  }
+
+  play(){
+    console.log('PLAYING ACTION');
   }
 }
