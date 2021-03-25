@@ -7,7 +7,7 @@ import { Expedition } from './expedition';
 export class ActionManager {
 
   actions = [
-    Expedition
+    new Expedition()
   ]
 
   constructor() { }

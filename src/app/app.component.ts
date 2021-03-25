@@ -94,9 +94,14 @@ export class AppComponent implements OnInit{
       args: ['action'],
       log: 'Action is being processed'
     },
-
+    {
+      event_name: 'end_round',
+      callback: this.game.end_round.bind(this.game),
+      args: ['action'],
+      log: 'Action is being processed'
+    }
   ];
-
+  
   constructor(private wsService: WebsocketService,
               private lobby: LobbyService,
               private game: GameService,

@@ -3,14 +3,13 @@ import { Action } from './action';
 
 export class Expedition extends Action{
 
-  name = "Goes in expedition";
-
   constructor() {
-      super();
+    super("Goes in expedition");
   }
 
-  title(){
-    return this.name;
+  process(){
+    console.log("processing action");
+    return "OK";
   }
   
 }

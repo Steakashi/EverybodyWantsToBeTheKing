@@ -21,6 +21,7 @@ import {
 } from '@angular/material/button'
 import { PlayerService } from './services/player.service';
 import { GameService } from './services/game.service';
+import { ActionComponent } from './game/action/action.component';
 
 const appRoutes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -38,7 +39,8 @@ const appRoutes: Routes = [
     AppComponent,
     HomeComponent,
     RoomComponent,
-    GameComponent
+    GameComponent,
+    ActionComponent
   ],
   imports: [
     BrowserModule,

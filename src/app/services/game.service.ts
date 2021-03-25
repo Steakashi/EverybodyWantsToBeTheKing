@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { PlayerService } from './player.service';
 import { ActionManager } from './actions/action-manager.service'
+import { LobbyService } from './lobby.service'
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,8 @@ export class GameService {
   clock: number;
 
   constructor(private player: PlayerService,
-              private actionManager: ActionManager) { }
+              private actionManager: ActionManager,
+              private lobby: LobbyService) { }
 
   initialize(playerName){
     this.player.initialize(playerName)
@@ -43,6 +45,14 @@ export class GameService {
   }
 
   play(){
-    console.log('PLAYING ACTION');
+    console.log(this.action);
+    status = this.action.process();
+    console.log(status);
+    this.lobby.emit_player_synchronization(this.get_player(), null)
+    this.lobby.emit_synchronization()
+  }
+
+  end_round(){
+    console.log("Round has ended");
   }
 }

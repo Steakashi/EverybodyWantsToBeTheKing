@@ -162,6 +162,7 @@ class User{
   popularity;
   agility;
   action;
+  targets;
   room_id;
   socket_id;
 
@@ -172,10 +173,11 @@ class User{
     this.player = {};
   }
 
-  synchronize_player(player, action){
+  synchronize_player(player, action, targets){
     this.popularity = player.popularity;
     this.agility = player.agility;
     this.action = action;
+    this.targets = targets;
   }
 
   update_name(name){
@@ -190,9 +192,9 @@ class User{
     this.status = STATUS_READY;
   }
 
-  play(){
+  process(){
     console.log("[Room " + this.room_id + "] Player with id " + this.id + " is now playing")
-    get_server_instance(this.id).emit_to_user('play', this.action);
+    get_server_instance(this.targets.shift()).emit_to_user('play', this.action);
   }
 
 }
@@ -270,9 +272,10 @@ class Room{
     this.pile.sort((p1, p2) => (p1.agility >= p2.agility) ? 1 : -1);
   }
 
-  process_pile(){
-    this.pile[0].play();
-    this.pile.shift();
+  process_pile(server){
+    var action = this.pile.shift()
+    if (action !== undefined){ action.process(); }
+    else{ server.emit_to_room("end_round"); }
   }
 
 }
@@ -484,7 +487,7 @@ io.on("connection", socket => {
 
   socket.on("player_synchronization", data => {
     console.log("[Room " + server.room.id + "] Player with id " + server.user.id + " has synchronized")
-    server.user.synchronize_player(data.player, data.action);
+    server.user.synchronize_player(data.player, data.action, data.targets);
   });
 
   socket.on("turn_end", data => {
@@ -500,6 +503,11 @@ io.on("connection", socket => {
         }
       );
     }
+  })
+
+  socket.on("synchronize", data => {
+    console.log("[Room " + server.room.id + "] Synchronization order received from user with id " + server.user.id)
+    server.room.process_pile(server)
   })
 });
 
