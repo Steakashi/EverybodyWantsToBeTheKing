@@ -135,19 +135,16 @@ export class LobbyService{
     this.wsService.emit('turn_end',{});
   }
 
-  emit_player_synchronization(player, action){
+  emit_synchronization(player, action, action_processed=null){
     this.wsService.emit(
-      'player_synchronization', 
+      'synchronization', 
       {
         'player': player, 
         'action': action,
-        'targets': [this.user.id]
+        'targets': [this.user.id],
+        'action_status': action_processed
       }
     );
-  }
-
-  emit_synchronization(){
-    this.wsService.emit('synchronize',{});
   }
 
   navigate_to_lobby(userName, roomID){

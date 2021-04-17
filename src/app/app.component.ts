@@ -83,8 +83,8 @@ export class AppComponent implements OnInit{
       log: 'Clock received'
     },
     {
-      event_name: 'begin_action',
-      callback: this.game.begin_action.bind(this.game),
+      event_name: 'begin_round',
+      callback: this.game.begin_round.bind(this.game),
       args: ['users'],
       log: 'All users has chosen an action'
     },
@@ -97,8 +97,8 @@ export class AppComponent implements OnInit{
     {
       event_name: 'end_round',
       callback: this.game.end_round.bind(this.game),
-      args: ['action'],
-      log: 'Action is being processed'
+      args: [],
+      log: 'Round has ended'
     }
   ];
   

@@ -29,7 +29,7 @@ export class GameComponent implements OnInit {
 
   ngOnInit(): void {
     this.game.initialize(this.lobby.get_user_name());
-    this.lobby.emit_player_synchronization(this.game.get_player(), this.game.get_action())
+    this.lobby.emit_synchronization(this.game.get_player(), this.game.get_action())
     this.gamestate = CHOOSING;
     this.begin_turn();
   }

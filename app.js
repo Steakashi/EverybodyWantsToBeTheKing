@@ -69,12 +69,12 @@ function delete_room(room){
   });
 }
 
-function begin_actions(server){
+function begin_round(server){
   console.log("[Room " + server.room.id + "] All players have chosen an action.")
   server.room.delete_interval()
   server.room.delete_turn_end();
   server.emit_to_room(
-    "begin_action",
+    "begin_round",
     {
       users: server.room.users,
     }
@@ -474,7 +474,7 @@ io.on("connection", socket => {
       )
       server.room.register_turn_end(
         setTimeout(
-          function(){ begin_actions(server); },1000 * TURNTIME)
+          function(){ begin_round(server); },1000 * TURNTIME)
       )
       server.emit_to_room(
         "game_launch", 
@@ -485,15 +485,17 @@ io.on("connection", socket => {
     }
   });
 
-  socket.on("player_synchronization", data => {
+  socket.on("synchronization", data => {
     console.log("[Room " + server.room.id + "] Player with id " + server.user.id + " has synchronized")
     server.user.synchronize_player(data.player, data.action, data.targets);
+    if (data.action_status === true){ server.room.process_pile(server); }
+    
   });
 
   socket.on("turn_end", data => {
     console.log("[Room " + server.room.id + "] Player with id " + server.user.id + " has ended his turn")
     server.user.end_turn();
-    if (server.room.are_players_ready()){ begin_actions(server); }
+    if (server.room.are_players_ready()){ begin_round(server); }
     else
     {
       server.emit_to_room(
@@ -503,11 +505,6 @@ io.on("connection", socket => {
         }
       );
     }
-  })
-
-  socket.on("synchronize", data => {
-    console.log("[Room " + server.room.id + "] Synchronization order received from user with id " + server.user.id)
-    server.room.process_pile(server)
   })
 });
 
