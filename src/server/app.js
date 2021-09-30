@@ -5,10 +5,12 @@ const { v4: uuidv4 } = require('uuid');
 
 
 const { ServerInstance } = require("./server");
+const { PileHandler, Action } = require("./pile");
 const io = require('./server').io;
 const http = require('./server').http;
 const dataHandler = require('./data');
 const cst = require('./constants');
+const { ActionManager } = require('../app/services/actions/action-manager.service')
 
 
 function _is_not_empty(object){
@@ -20,15 +22,15 @@ function begin_round(server){
   console.log("[Room " + server.room.id + "] All players have chosen an action.")
   server.room.delete_interval()
   server.room.delete_turn_end();
-  console.log()
   server.emit_to_room(
     "begin_round",
     {
       users: server.room.users,
     }
   );
-  server.room.sort_players();
-  server.room.process_pile();
+  server.room.pile.sort();
+  server.room.pile.process()
+  //server.room.process_pile();
 }
 
 function begin_turn(server){
@@ -50,10 +52,9 @@ function begin_turn(server){
   )
 }
 
+// Todo : remove
 function process_pile(server){
-  console.log('process_pile');
   var action = server.room.pile.shift()
-  console.log(action)
   if (action !== undefined){ action.process(); }
   else{ 
     console.log("[Room " + server.room.id + "] All players have played. Beginning new round.")
@@ -63,12 +64,19 @@ function process_pile(server){
 }
 
 io.on("connection", socket => {
+  ActionManager.test();
   var server = undefined;
+  
+  // Automatically send a signal to tell client that server is up
   socket.emit('user_connection');
 
+  // If same signal is received, then client is up too : let's create a ServerInstance and connect the user to it.
   socket.on('user_connection', data => {
     server = new ServerInstance(socket);
     user = dataHandler.get_user(data.user_id);
+
+    // If user is already found, it means client is already connected.
+    // If user has DISCONNECTED status, we consider that client has recently disconnected by mistake, and so we reconnect him to server.
     if (user){
       if (user.status == cst.STATUS.DISCONNECTED)
       {
@@ -81,51 +89,38 @@ io.on("connection", socket => {
         if (server.room !== undefined)
         {
           server.socket.join(server.room.id);
-          server.emit_to_user(
-            "room_connection",
-            {
-              room_id: server.room.id,
-              room_name: server.room.name,
-              user_id: server.user.id,
-              user_name: server.user.name
-            }
-          )
+          server.emit_room_connection();
     
-          server.emit_to_room(
-            "users_update",
-            {
-              users: server.room.users,
-              user_name: server.user.name
-            }
-          )
+          server.emit_users_update();
         };
       }
+      
+      // If another status is retrieved, then we consider that the user try to connect to the app through another tab.
+      // In this case we abort loading.
+      // The utility of this process was that the client can reconnect from any tab whenever he needs. 
+      // But it may be not necessary since the inclusion of the reconnection module through user status.
       else
       {
         console.log("Warning : multiple connection from single user detected");
         server.emit_to_user('user_duplicated');  
       }
     }
+
+    // If no user is found, we deal with a first connexion with a client, and therefore create all the things we need to generate all necessary data and acknowledge user connection.
     else{
       dataHandler.instances.push(server);
       server.generate_user(data.user_id);
-      console.log("User connected with id " + data.user_id)
-      server.set_status(cst.STATUS_CONNECTED);
+      console.log("User connected with id " + server.user.id)
+      server.set_status(cst.STATUS.CONNECTED);
       server.emit_to_user('user_connection_confirmed');
     }
   });
 
   socket.on("disconnect", function() {
     console.log("User with id " + server.user.id +  " disconnected. Waiting " + cst.TIMEOUT + "ms for reconnection...");
-    server.set_status(cst.STATUS_DISCONNECTED);
+    server.set_status(cst.STATUS.DISCONNECTED);
     if (server.room !== undefined){
-      server.emit_to_room(
-        "users_update",
-        {
-          users: server.room.users,
-          user_name: server.user.name
-        }
-      )
+      server.emit_users_update();
     };
 
     server.register_timeout(
@@ -172,30 +167,19 @@ io.on("connection", socket => {
     console.log("User update order received on room : " + data.room_id)
     user = dataHandler.get_user(data.user_id);
     user.update_name(data.user_name);
-    server.emit_to_room(
-      "users_update",
-      {
-        users: server.room.users,
-        user_name: data.user_name
-      }
-    )
+    server.emit_users_update();
     server.emit_to_user(
       "user_update",
       {user_name: data.user_name}
     )
+
   })
 
   socket.on("room_creation", data => {
     console.log("Room creation order received on room : " + data.room_id);
     server.user.update_name(data.user_name);
     server.generate_room(data.room_id, data.room_name);
-    server.emit_to_room(
-      "users_update",
-      {
-        users: server.room.users,
-        user_name: server.user.name
-      }
-    )
+    server.emit_users_update();
   });
 
   socket.on("room_connection", data => {
@@ -206,23 +190,9 @@ io.on("connection", socket => {
       server.user.update_name(data.user_name);
       server.set_room(room);
       server.join_room();
-      server.emit_to_user(
-        "room_connection",
-        {
-          room_id: server.room.id,
-          room_name: server.room.name,
-          user_id: server.user.id,
-          user_name: server.user.name
-        }
-      );
+      server.emit_room_connection();
 
-      server.emit_to_room(
-        "users_update",
-        {
-          users: server.room.users,
-          user_name: server.user.name
-        }
-      );
+      server.emit_users_update();
 
     }
     else {
@@ -241,6 +211,7 @@ io.on("connection", socket => {
     {
       console.log("Game launch order received on room : " + server.room.id + " from user : " + server.user.id);
       server.room.game_master = server.user;
+      server.room.pile = new PileHandler(server);
       begin_turn(server);
       server.emit_to_room(
         "game_launch", 
@@ -253,24 +224,35 @@ io.on("connection", socket => {
 
   socket.on("synchronization", data => {
     console.log("[Room " + server.room.id + "] Player with id " + server.user.id + " has synchronized")
-    server.user.synchronize_player(data.player, data.action, data.targets);
-    if (data.action_processed === true){ process_pile(server); }
+    server.user.synchronize_player(data.player);
+
+    //if (data.action_processed === true){ process_pile(server); }
     
   });
 
   socket.on("turn_end", data => {
     console.log("[Room " + server.room.id + "] Player with id " + server.user.id + " has ended his turn")
+    console.log(data);
+    console.log(data.emitter);
+    server.room.pile.add(
+      new Action(
+        name=data.action.name,
+        order=data.action.order,
+        emitter=data.emitter,
+        targets=data.targets,
+        receivers=data.receivers
+      )
+    )
     server.user.end_turn();
     if (server.room.are_players_ready()){ begin_round(server); }
     else
     {
-      server.emit_to_room(
-        "users_update",
-        {
-          users: server.room.users,
-        }
-      );
+      server.emit_users_update();
     }
+  })
+
+  socket.on("action_state_processed", data => {
+    server.room.pile.process()
   })
 });
 

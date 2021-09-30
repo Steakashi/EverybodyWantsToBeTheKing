@@ -44,7 +44,6 @@ class Room{
   
     are_players_ready(){
       for(var i = 0; i < this.users.length; i++) {
-        console.log(this.users[i].status);
         if (this.users[i].status === cst.STATUS.PLAYING) {
           return false;
         };
@@ -69,21 +68,10 @@ class Room{
       clearInterval(this.interval);
     }
   
+    // Todo : Remove
     sort_players(){
       this.pile = this.users.map((x) => x);
       this.pile.sort((p1, p2) => (p1.agility >= p2.agility) ? 1 : -1);
-    }
-  
-    process_pile(server){
-      console.log('process_pile');
-      var action = this.pile.shift()
-      console.log(action)
-      if (action !== undefined){ action.process(); }
-      else{ 
-        console.log("[Room " + server.room.id + "] All players have played. Beginning new round.")
-        server.emit_to_room("end_round"); 
-        begin_turn(server);
-      }
     }
   
   }

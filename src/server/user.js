@@ -8,8 +8,6 @@ class User{
     status;
     popularity;
     agility;
-    action;
-    targets;
     room_id;
     socket_id;
   
@@ -17,14 +15,11 @@ class User{
       this.id = id;
       this.name = name;
       this.status = cst.STATUS.UNKNOWN;
-      this.player = {};
     }
   
-    synchronize_player(player, action, targets){
+    synchronize_player(player){
       this.popularity = player.popularity;
       this.agility = player.agility;
-      this.action = action;
-      this.targets = targets;
     }
   
     update_name(name){
@@ -39,6 +34,7 @@ class User{
       this.status = cst.STATUS.READY;
     }
   
+    //Todo : remove
     process(){
       console.log("[Room " + this.room_id + "] Player with id " + this.id + " is now playing")
       dataHandler.get_server_instance(this.targets.shift()).emit_to_user('play', this.action);

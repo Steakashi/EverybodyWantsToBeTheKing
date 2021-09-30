@@ -1,6 +1,22 @@
 var instances = []
+var instances_number = 0
 var rooms = []
+var rooms_number = 0
 var users = []
+var users_number = 0
+
+function _generate_id(suffix, number){
+  console.log(number)
+  formatted_name = suffix + number.toString();
+  number += 1;
+  return formatted_name;
+
+}
+
+function generate_user_id(){
+  console.log(users_number)
+  return _generate_id("USER", users_number);
+}
 
 function get_server_instance(user_id){
   var instance_found = null;
@@ -50,6 +66,7 @@ module.exports = {
   instances: instances,
   rooms: rooms,
   users: users,
+  generate_user_id: generate_user_id,
   get_server_instance: get_server_instance,
   get_room: get_room,
   get_user: get_user,

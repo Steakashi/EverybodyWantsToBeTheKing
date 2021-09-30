@@ -30,6 +30,28 @@ class ServerInstance{
     emit_to_room(event_name, data={}){
       io.to(this.room.id).emit(event_name, data);
     }
+
+    emit_users_update(){
+      this.emit_to_room(
+        "users_update",
+        {
+          user_name: this.user.name,
+          users: this.room.users
+        }
+      )
+    }
+
+    emit_room_connection(){
+      this.emit_to_room(
+        "room_connection",
+        {
+          room_id: this.room.id,
+          room_name: this.room.name,
+          user_id: this.user.id,
+          user_name: this.user.name
+        }
+      )
+    }
   
     generate_user(user_id){
       this.user = new User(user_id);
@@ -37,6 +59,7 @@ class ServerInstance{
     }
   
     set_status(status){
+      console.log(status);
       this.user.status = status
     }
   
