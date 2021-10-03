@@ -9,4 +9,11 @@ const STATUS = {
     READY : "ready",
 }
 
-module.exports = { TIMEOUT, TURNTIME, STATUS }
+const ACTION_EVENTS = {
+    SUCCESS : "success",
+    FAILURE : "failure",
+    STATE : "state",
+    MESSAGE : "message"
+}
+
+module.exports = { TIMEOUT, TURNTIME, STATUS, ACTION_EVENTS }

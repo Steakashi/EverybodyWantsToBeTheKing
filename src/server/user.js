@@ -8,6 +8,7 @@ class User{
     status;
     popularity;
     agility;
+    golds;
     room_id;
     socket_id;
   
@@ -20,6 +21,7 @@ class User{
     synchronize_player(player){
       this.popularity = player.popularity;
       this.agility = player.agility;
+      this.golds = player.golds;
     }
   
     update_name(name){

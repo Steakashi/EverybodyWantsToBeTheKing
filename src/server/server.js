@@ -35,8 +35,16 @@ class ServerInstance{
       this.emit_to_room(
         "users_update",
         {
-          user_name: this.user.name,
           users: this.room.users
+        }
+      )
+    }
+
+    emit_players_update(){
+      this.emit_to_room(
+        "players_update",
+        {
+          players: this.room.users
         }
       )
     }
