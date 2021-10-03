@@ -1,4 +1,5 @@
 const dataHandler = require("./data");
+const action_manager = require('./actions/action-manager');
 
 class PileHandler{
 
@@ -12,12 +13,11 @@ class PileHandler{
         this.pile = [];
     }
 
-    add(action){
-        this.pile.push(action);
+    add(action_data){
+        this.pile.push(action_manager.initialize_action(action_data));
     }
 
     sort(){
-        console.log(this.pile);
         this.pile.sort((action1, action2) => (action1.emitter.agility >= action2.emitter.agility) ? 1 : -1);
     }
 
@@ -107,6 +107,5 @@ class Action{
 
 
 module.exports = { 
-    PileHandler: PileHandler, 
-    Action: Action
+    PileHandler: PileHandler
 };

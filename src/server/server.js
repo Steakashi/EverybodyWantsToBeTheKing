@@ -47,8 +47,6 @@ class ServerInstance{
         {
           room_id: this.room.id,
           room_name: this.room.name,
-          user_id: this.user.id,
-          user_name: this.user.name
         }
       )
     }
@@ -59,7 +57,6 @@ class ServerInstance{
     }
   
     set_status(status){
-      console.log(status);
       this.user.status = status
     }
   

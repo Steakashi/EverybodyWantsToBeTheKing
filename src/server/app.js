@@ -5,12 +5,11 @@ const { v4: uuidv4 } = require('uuid');
 
 
 const { ServerInstance } = require("./server");
-const { PileHandler, Action } = require("./pile");
+const { PileHandler } = require("./pile");
 const io = require('./server').io;
 const http = require('./server').http;
 const dataHandler = require('./data');
 const cst = require('./constants');
-const { ActionManager } = require('../app/services/actions/action-manager.service')
 
 
 function _is_not_empty(object){
@@ -64,7 +63,6 @@ function process_pile(server){
 }
 
 io.on("connection", socket => {
-  ActionManager.test();
   var server = undefined;
   
   // Automatically send a signal to tell client that server is up
@@ -184,7 +182,6 @@ io.on("connection", socket => {
 
   socket.on("room_connection", data => {
     console.log("Room connection order received on room : " + data.room_id + " from user : " + data.user_id);
-
     let room = dataHandler.get_room(data.room_id)
     if (room){
       server.user.update_name(data.user_name);
@@ -232,17 +229,7 @@ io.on("connection", socket => {
 
   socket.on("turn_end", data => {
     console.log("[Room " + server.room.id + "] Player with id " + server.user.id + " has ended his turn")
-    console.log(data);
-    console.log(data.emitter);
-    server.room.pile.add(
-      new Action(
-        name=data.action.name,
-        order=data.action.order,
-        emitter=data.emitter,
-        targets=data.targets,
-        receivers=data.receivers
-      )
-    )
+    server.room.pile.add(data.action);
     server.user.end_turn();
     if (server.room.are_players_ready()){ begin_round(server); }
     else
