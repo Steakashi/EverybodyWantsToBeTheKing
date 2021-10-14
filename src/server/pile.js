@@ -49,10 +49,10 @@ class PileHandler{
         this.server.emit_to_room(
             "end_round",
             {
-              players: this.room.users,
-              events: events_report
+                players: this.room.users,
+                events: events_report
             }
-          )
+        )
         //if (!result){
             //console.log("[Room " + this.server.room.id + "] All players have played. Beginning new round.")
             //this.server.emit_to_room("end_round"); 

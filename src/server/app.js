@@ -17,7 +17,7 @@ function _is_not_empty(object){
 }
 
 
-function begin_round(server){
+function process_round(server){
   console.log("[Room " + server.room.id + "] All players have chosen an action.")
   server.room.delete_interval()
   server.room.delete_turn_end();
@@ -28,12 +28,16 @@ function begin_round(server){
     }
   );
   server.room.pile.sort();
-  server.room.pile.process()
-  //server.room.process_pile();
+  server.room.pile.process();
+
 }
 
+
+
 function begin_turn(server){
-  server.room.begin_turn()
+  server.room.pile = new PileHandler(server);
+  server.room.begin_turn(server);
+  server.emit_users_update();
   server.room.register_interval(
     setInterval(
       function(){
@@ -49,17 +53,6 @@ function begin_turn(server){
     setTimeout(
       function(){ begin_round(server); },1000 * cst.TURNTIME)
   )
-}
-
-// Todo : remove
-function process_pile(server){
-  var action = server.room.pile.shift()
-  if (action !== undefined){ action.process(); }
-  else{ 
-    console.log("[Room " + server.room.id + "] All players have played. Beginning new round.")
-    server.emit_to_room("end_round"); 
-    begin_turn(server);
-  }
 }
 
 io.on("connection", socket => {
@@ -168,7 +161,7 @@ io.on("connection", socket => {
     server.emit_users_update();
     server.emit_to_user(
       "user_update",
-      {user_name: data.user_name}
+      {user: data.user}
     )
 
   })
@@ -208,12 +201,11 @@ io.on("connection", socket => {
     {
       console.log("Game launch order received on room : " + server.room.id + " from user : " + server.user.id);
       server.room.game_master = server.user;
-      server.room.pile = new PileHandler(server);
       begin_turn(server);
       server.emit_to_room(
         "game_launch", 
         {
-          users: server.room.users,
+          "users": server.room.users,
         }
       );
     }
@@ -231,15 +223,16 @@ io.on("connection", socket => {
     console.log("[Room " + server.room.id + "] Player with id " + server.user.id + " has ended his turn")
     server.room.pile.add(data.action);
     server.user.end_turn();
-    if (server.room.are_players_ready()){ begin_round(server); }
-    else
-    {
-      server.emit_users_update();
+    server.emit_users_update();
+    if (server.room.are_players_ready()){ 
+      process_round(server); 
+      begin_turn(server);
     }
+  
   })
 
   socket.on("action_state_processed", data => {
-    server.room.pile.process()
+    server.room.pile.process();
   })
 });
 
