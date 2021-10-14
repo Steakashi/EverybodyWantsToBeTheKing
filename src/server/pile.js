@@ -39,22 +39,20 @@ class PileHandler{
         if (this.pile.length == 0){
             return false
         }
-        var actions_report = this.initialize_blank_report();
+        var events_report = this.initialize_blank_report();
         this.pile.forEach(action => {
             console.log("[Room " + this.server.room.id + "][User " + action.emitter.id + "] Processing action [" + action.identifier + "]");
             var action_result = action.process();
-            actions_report[action.emitter.id].push(action_result);
+            events_report[action.emitter.id] = action_result;
         })
         console.log("[Room " + this.server.room.id + "] No action left to process : all players have played. Beginning new round.");
-        console.log(actions_report);
         this.server.emit_to_room(
-            "players_update",
+            "end_round",
             {
-              players: this.room.users
+              players: this.room.users,
+              events: events_report
             }
           )
-        console.log(this.server.room.users);
-        return true
         //if (!result){
             //console.log("[Room " + this.server.room.id + "] All players have played. Beginning new round.")
             //this.server.emit_to_room("end_round"); 
