@@ -33,7 +33,6 @@ function process_round(server){
 }
 
 
-
 function begin_turn(server){
   server.room.pile = new PileHandler(server);
   server.room.begin_turn(server);
@@ -51,7 +50,7 @@ function begin_turn(server){
   )
   server.room.register_turn_end(
     setTimeout(
-      function(){ begin_round(server); },1000 * cst.TURNTIME)
+      function(){ process_round(server); },1000 * cst.TURNTIME)
   )
 }
 

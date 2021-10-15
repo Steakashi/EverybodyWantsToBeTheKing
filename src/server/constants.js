@@ -16,4 +16,8 @@ const ACTION_EVENTS = {
     MESSAGE : "message"
 }
 
-module.exports = { TIMEOUT, TURNTIME, STATUS, ACTION_EVENTS }
+const PLAYER_STATE = {
+    RESTED: "rested"
+}
+
+module.exports = { TIMEOUT, TURNTIME, STATUS, ACTION_EVENTS, PLAYER_STATE }

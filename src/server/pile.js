@@ -42,6 +42,7 @@ class PileHandler{
         var events_report = this.initialize_blank_report();
         this.pile.forEach(action => {
             console.log("[Room " + this.server.room.id + "][User " + action.emitter.id + "] Processing action [" + action.identifier + "]");
+            action.preprocess();
             var action_result = action.process();
             events_report[action.emitter.id] = action_result;
         })

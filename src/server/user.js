@@ -1,3 +1,4 @@
+const { timeStamp } = require('console');
 const cst = require('./constants');
 const dataHandler = require('./data');
 
@@ -6,9 +7,11 @@ class User{
     id;
     name;
     status;
+    life;
     popularity;
     agility;
     golds;
+    states;
     room_id;
     socket_id;
   
@@ -19,9 +22,11 @@ class User{
     }
   
     synchronize_player(player){
+      this.life = player.life;
       this.popularity = player.popularity;
       this.agility = player.agility;
       this.golds = player.golds;
+      this.states = player.states;
     }
   
     update_name(name){

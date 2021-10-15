@@ -1,14 +1,8 @@
-const dataHandler = require("../data");
 const cst = require("../constants");
+const { AbstractAction } = require("./abstract-action");
 
-class Expedition{
-    name;
 
-    constructor(action_data) {
-        this.emitter = dataHandler.get_user(action_data.emitter);
-        this.name = action_data.name;
-        this.identifier = action_data.identifier;
-    }
+class Expedition extends AbstractAction{
 
     process(){
         this.emitter.golds += 50;
