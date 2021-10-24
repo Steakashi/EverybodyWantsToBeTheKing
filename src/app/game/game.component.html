@@ -1,14 +1,21 @@
 
 <h5>{{ get_player_name() }}</h5>
 <ul>
-    <li>{{ get_player_popularity() }}</li>
+    <li><b>Life Points : </b>{{ get_player_life() }}</li>
+    <li><b>Popularity : </b>{{ get_player_popularity() }}</li>
+    <li><b>Golds : </b>{{ get_player_golds() }}</li>
+    <li *ngFor="let state of get_player_states()"><b>States : </b>{{ state.name }}</li>
 </ul>
 
 
-<div *ngIf="gamestate=='CHOOSING'">
+<div *ngIf="gamestate()=='CHOOSING'">
     <h6>Players</h6>
     <ul *ngIf="get_room_users()">
         <li *ngFor="let user of get_room_users()">{{ user.name }} ({{ user.id }}) ({{ user.status }})</li>
+    </ul>
+
+    <ul *ngIf="get_events()">
+        <li *ngFor="let event of get_events()">{{ event.title }} ({{ event.message }})</li>
     </ul>
 
     <h6>Timer</h6>
@@ -16,10 +23,53 @@
 
     <h5>Actions</h5>
     <ul>
-        <li *ngFor="let action of get_actions()"><button (click)="register_action(action)">{{ action.name }}</button></li>
+        <li *ngFor="let action of get_actions()"><button (click)="select_action(action, content)">{{ action.name }}</button></li>
     </ul>
+<!--
+    <div >id="target_selection" [style.display]="target_selection_is_displayed ? 'block' : 'none'"
+        <h4>Choose a target</h4>
+        <ul>
+            <li *ngFor="let player of get_alive_players()"><button (click)="register_target(player)">{{ player.name }}</button></li>
+        </ul>
+    </div>
+-->
+    <!-- Target selection -->
+    <!--<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <button *ngFor="let player of get_alive_players()" (click)="register_target(player)" type="button" class="btn btn-primary">{{ player.name }}</button>
+            </div>
+          </div>
+        </div>
+      </div>-->
+
+    <ng-template #content let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Choose target</h4>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <form>
+        <div class="form-group">
+            <ul>
+                <li *ngFor="let user of get_alive_opponents()">
+                    <button class="btn btn-outline-dark" (click)="register_target(user.id); modal.close('Save click')">{{ user.name }}</button>
+                </li>
+            </ul>
+        </div>
+        </form>
+    </div>
+    </ng-template>
+
 </div>
 
-<div *ngIf="gamestate=='PROCESSING'"></div>
+<div *ngIf="gamestate()=='PROCESSING'"></div>
 
 <app-action></app-action>

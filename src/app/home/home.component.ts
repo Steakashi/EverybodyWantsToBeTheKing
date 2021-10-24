@@ -25,6 +25,7 @@ export class HomeComponent {
 
   join_room(userName, roomID){
     this.lobby.navigate_to_lobby(userName, roomID);
+
   }
 
   get_room(){

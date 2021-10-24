@@ -36,6 +36,10 @@ export class LobbyService{
     this.room.id = roomID;
   }
 
+  set_user_name(userName){
+    this.user.name = userName;
+  }
+
   get_user_id(){
     return this.user.id;
   }
@@ -115,13 +119,13 @@ export class LobbyService{
     );
   }
 
-  emit_user_order_update(userName){
+  emit_user_order_update(){
     this.wsService.emit(
       'user_update',
       {
         action: 'user_update',
         user_id: this.user.id,
-        user_name: userName,
+        user_name: this.user.name,
         room_id: this.room.id,
       }
     );
@@ -131,18 +135,29 @@ export class LobbyService{
     this.wsService.emit('game_launch',{});
   }
 
-  emit_turn_end(){
-    this.wsService.emit('turn_end',{});
+  emit_turn_end(action){
+    console.log(action)
+    this.wsService.emit('turn_end',
+      {
+        'action': action
+      }
+    );
   }
 
-  emit_synchronization(player, action, action_processed=null){
+  emit_synchronization(player){
     this.wsService.emit(
       'synchronization', 
       {
-        'player': player, 
-        'action': action,
-        'targets': [this.user.id],
-        'action_status': action_processed
+        'player': player
+      }
+    );
+  }
+
+  emit_action_state_processed(player){
+    this.wsService.emit(
+      'action_state_processed', 
+      {
+        'player': player
       }
     );
   }
@@ -164,11 +179,9 @@ export class LobbyService{
     this.router.navigate(['room/' + this.room.id]).then(() => { this.validate_connection(); });
   }
 
-  join_room(roomID, roomName, userID, userName){
+  join_room(roomID, roomName){
     this.room.id = roomID;
     this.room.name = roomName;
-    this.user.id = userID;
-    this.user.name = userName;
     this.validate_connection();
   }
 
@@ -187,6 +200,11 @@ export class LobbyService{
 
   update_users(users){
     this.users = users;
+    console.log(this.users);
+    console.log(this.user)
+    this.users.forEach(user => {
+      if (user.id === this.user.id){ this.user = user; console.log('user_found'); console.log(this.user)}
+    })
   }
 
   update_user(user){

@@ -49,7 +49,7 @@ export class AppComponent implements OnInit{
     {
       event_name: 'user_update',
       callback: this.lobby.update_user.bind(this.lobby),
-      args: ['user_name'],
+      args: ['user'],
       log: 'Single user data has been updated from server'
     },
     {
@@ -61,7 +61,7 @@ export class AppComponent implements OnInit{
     {
       event_name: 'room_connection',
       callback: this.lobby.join_room.bind(this.lobby),
-      args: ['room_id', 'room_name', 'user_id', 'user_name', 'users'],
+      args: ['room_id', 'room_name'],
       log: 'Room connection order received from server'
     },
     {
@@ -75,6 +75,12 @@ export class AppComponent implements OnInit{
       callback: this.lobby.launch_game.bind(this.lobby),
       args: ['users'],
       log: 'User has launched a game'
+    },
+    {
+      event_name: 'players_update',
+      callback: this.game.update_players.bind(this.game),
+      args: ['players'],
+      log: 'Players has been updated from server'
     },
     {
       event_name: 'turn_clock',
@@ -91,17 +97,19 @@ export class AppComponent implements OnInit{
     {
       event_name: 'play',
       callback: this.game.play.bind(this.game),
-      args: ['action'],
+      args: ['action', 'state'],
       log: 'Action is being processed'
     },
     {
       event_name: 'end_round',
       callback: this.game.end_round.bind(this.game),
-      args: [],
+      args: ['players', 'events'],
       log: 'Round has ended'
     }
   ];
   
+
+  display_events_report
   constructor(private wsService: WebsocketService,
               private lobby: LobbyService,
               private game: GameService,
