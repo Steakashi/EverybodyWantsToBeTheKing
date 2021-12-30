@@ -12,6 +12,8 @@ import { AuthGuardService } from './services/auth-guard.service';
 import { WebsocketService } from './services/websocket.service';
 import { HomeComponent } from './home/home.component';
 import { LobbyService } from './services/lobby.service';
+import { Room } from './services/room.service';
+import { User } from './services/user.service';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { RoomComponent } from './room/room.component';
@@ -20,7 +22,6 @@ import { GameComponent } from './game/game.component';
 import {
   MatButtonModule,
 } from '@angular/material/button'
-import { PlayerService } from './services/player.service';
 import { GameService } from './services/game.service';
 import { ActionComponent } from './game/action/action.component';
 
@@ -57,9 +58,10 @@ const appRoutes: Routes = [
     AuthGuardService,
     WebsocketService,
     GameService,
-    PlayerService,
     LobbyService,
-    CookieService
+    CookieService,
+    Room,
+    User
   ],
   bootstrap: [AppComponent]
 })

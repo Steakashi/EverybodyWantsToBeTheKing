@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { PlayerService } from './player.service';
+import { User } from './user.service';
 import { ActionManager } from './actions/action-manager.service'
 import { LobbyService } from './lobby.service'
 import { TestBed } from '@angular/core/testing';
@@ -27,22 +27,25 @@ export class GameService {
   gamestate: string;
   processed_events: any = [];
 
-  constructor(private player: PlayerService,
-              private actionManager: ActionManager,
+  constructor(private actionManager: ActionManager,
               private lobby: LobbyService) { }
 
-  players = [];
+  users = [];
 
-  initialize(user){
-    this.player.initialize(user)
+  initialize(){
+    var user = this.get_user();
+    console.log(user);
+    console.log(typeof(user));
+    console.dir(user);
+    user.reset_stats();
   }
 
-  get_player(){
-    return this.player;
+  get_user(){
+    return this.lobby.user;
   }
 
-  get_players(){
-    return this.players;
+  get_users(){
+    return this.lobby.users;
   }
 
   get_action(){
@@ -70,20 +73,15 @@ export class GameService {
     this.clock = value;
   }
 
-  update_players(players){
-    this.players = players;
-    players.forEach(given_player => {
-      if (given_player.id === this.player.user.id) this.player.synchronize(given_player);
+  update_users(users){
+    this.lobby.users = users;
+    users.forEach(given_user => {
+      if (given_user.id === this.get_user().id) this.get_user().synchronize(given_user);
     })
   }
 
-  launch_game(users){
-    this.update_players(users);
-    this.lobby.launch_game(users);
-  }
-
   begin_turn(){
-    this.lobby.emit_synchronization(this.get_player())
+    this.lobby.emit_synchronization(this.get_user())
     this.gamestate = CHOOSING;
     this.clock = TURNTIME;
   }
@@ -96,15 +94,15 @@ export class GameService {
     console.log(action);
     console.log(group_target);
     //status = this.action.process();
-    //this.lobby.emit_action_state_processed(this.get_player())
+    //this.lobby.emit_action_state_processed(this.get_user())
   }
 
-  end_round(players, events){
-    this.update_players(players);
+  end_round(users, events){
+    this.update_users(users);
     this.processed_events = [];
     for (let user_id in events) {
       var event = new Event();
-      if (this.get_player().user.id == events[user_id].emitter){
+      if (this.get_user().id == events[user_id].emitter){
         event.message = events[user_id].custom_message
       }
       else{  

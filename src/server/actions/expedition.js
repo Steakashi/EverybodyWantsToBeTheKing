@@ -3,6 +3,10 @@ const { AbstractAction } = require("./abstract-action");
 
 
 class Expedition extends AbstractAction{
+    
+    constructor(name, duration) {
+        super(name, duration);
+      }
 
     process(){
         this.emitter.golds += 50;

@@ -1,10 +1,13 @@
-import {Injectable} from '@angular/core';
+import { Injectable} from '@angular/core';
 import { ToastrService  } from 'ngx-toastr';
-import { WebsocketService } from './websocket.service';
 import * as uuid from 'uuid';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
-import {ExecutionPileService} from './execution-pile.service';
+
+import { ExecutionPileService } from './execution-pile.service';
+import { WebsocketService } from './websocket.service';
+import { User } from './user.service';
+import { Room } from './room.service';
 
 
 const PENDING = 'PENDING';
@@ -17,8 +20,8 @@ const ERROR = 'ERROR';
 @Injectable()
 export class LobbyService{
   title: string;
-  user = {name: undefined, id: undefined};
-  room = {name: undefined, id: undefined};
+  user: any;
+  room: any;
   users = [];
   state: string = null;
 
@@ -32,24 +35,25 @@ export class LobbyService{
     this.title = title;
   }
 
-  set_room_id_from_url(roomID){
-    this.room.id = roomID;
+  set_room_id_from_url(room_id){
+    this.room = new Room();
+    this.room.id = room_id;
   }
 
-  set_user_name(userName){
-    this.user.name = userName;
+  set_user_name(user_name){
+    this.user.name = user_name;
   }
 
   get_user_id(){
-    return this.user.id;
+    if (this.user) return this.user.id;
   }
 
   get_user_name(){
-    return this.user.name;
+    if (this.user) return this.user.name;
   }
 
   get_current_room_name(){
-    return this.room.name;
+    if (this.room) return this.room.name;
   }
 
   connection_is_allowed(){
@@ -92,16 +96,15 @@ export class LobbyService{
     this.router.navigate(['game/' + this.room.id]);
   }
 
-  emit_room_order_creation(userName, roomName) {
+  emit_room_order_creation(user_name, room_name) {
     if (!this.connection_is_allowed()){ return; }
     this.wsService.emit(
       'room_creation',
       {
-        action: 'room_creation',
         user_id: this.user.id,
-        user_name: userName,
+        user_name: user_name,
         room_id: uuid.v4(),
-        room_name: roomName,
+        room_name: room_name,
       }
     );
   }
@@ -111,7 +114,6 @@ export class LobbyService{
     this.wsService.emit(
       'room_connection',
       {
-        action: 'room_connection',
         user_id: this.user.id,
         user_name: this.user.name !== undefined ? this.user.name : 'randomName',
         room_id: this.room.id,
@@ -123,7 +125,6 @@ export class LobbyService{
     this.wsService.emit(
       'user_update',
       {
-        action: 'user_update',
         user_id: this.user.id,
         user_name: this.user.name,
         room_id: this.room.id,
@@ -144,71 +145,83 @@ export class LobbyService{
     );
   }
 
-  emit_synchronization(player){
+  emit_synchronization(user){
     this.wsService.emit(
       'synchronization', 
       {
-        'player': player
+        'player': user
       }
     );
   }
 
-  emit_action_state_processed(player){
+  emit_action_state_processed(user){
     this.wsService.emit(
       'action_state_processed', 
       {
-        'player': player
+        'player': user
       }
     );
   }
 
-  navigate_to_lobby(userName, roomID){
-    this.room.id = roomID;
-    this.user.name = userName;
-    this.router.navigate(['room/' + this.room.id]).then(() => { this.emit_room_order_connection(); });
+  navigate_to_lobby(user_name, room_id){
+    // TODO : check if we need to fix room id at this moment
+    //this.room.id = room_id;
+    this.user.name = user_name;
+    this.router.navigate(['room/' + room_id]).then(() => { this.emit_room_order_connection(); });
   }
 
-  create_room(roomName, roomID, userName){
-    this.room.name = roomName;
-    this.room.id = roomID;
-    this.user.name = userName;
-    this.users.push({
-      user_name: this.user.name,
-      user_id: this.user.id
-    });
+  create_room(room_name, room_id, user_name){
+    this.room = new Room();
+    this.room.id = room_id;
+    this.room.name = room_name;
+
+    this.user.name = user_name;
+    this.users.push(this.user);
     this.router.navigate(['room/' + this.room.id]).then(() => { this.validate_connection(); });
   }
 
-  join_room(roomID, roomName){
-    this.room.id = roomID;
-    this.room.name = roomName;
+  join_room(room_id, room_name){
+    this.room = new Room();
+    this.room.id = room_id;
+    this.room.name = room_name;
     this.validate_connection();
   }
 
   connect_user(){
     const retrievedID = this.cookie.get(this.title);
     if ((retrievedID === '') || (retrievedID === undefined) || (retrievedID === null)){
+      this.user = new User();
       this.user.id = uuid.v4();
       this.cookie.set(this.title, this.user.id);
     }
     else{
+      this.user = new User();
       this.user.id = retrievedID;
     }
-
-    return this.user.id;
   }
-
+/*
   update_users(users){
     this.users = users;
-    console.log(this.users);
-    console.log(this.user)
     this.users.forEach(user => {
-      if (user.id === this.user.id){ this.user = user; console.log('user_found'); console.log(this.user)}
+      if (user.id === this.user.id){ this.user = user; }
     })
+  }*/
+
+  update_users(users){
+    this.users = [];
+    users.forEach(given_user => {
+      var user = new User();
+      user.synchronize(given_user);
+      this.users.push(user);
+      if (given_user.id === this.user.id) this.user.synchronize(given_user);
+    })
+    console.log(this.users);
   }
 
   update_user(user){
-    this.user = user;
+    console.log('update_user');
+    console.log(user);
+    this.user.synchronize(user);
   }
 
 }

@@ -1,6 +1,6 @@
 const dataHandler = require("../data");
 
-class PlayerState{
+class PlayerEffect{
     name;
     duration;
 
@@ -32,18 +32,17 @@ class AbstractAction{
     }
 
     preprocess(){
-        console.log(this.emitter.states);
-        this.emitter.states.forEach(state => {
-            state.consume();
-            if (state.is_over()){ 
-                var state_index = this.emitter.states.indexOf(state);
-                this.emitter.states.splice(state_index, 1);
+        this.emitter.effects.forEach(effect => {
+            effect.consume();
+            if (effect.is_over()){ 
+                var effect_index = this.emitter.effects.indexOf(effect);
+                this.emitter.effects.splice(effect_index, 1);
              }
         })
     }
 
-    initialize_state(name, duration){
-        return new PlayerState(name, duration);
+    initialize_effect(name, duration){
+        return new PlayerEffect(name, duration);
     }
 }
 

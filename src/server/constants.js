@@ -12,12 +12,12 @@ const STATUS = {
 const ACTION_EVENTS = {
     SUCCESS : "success",
     FAILURE : "failure",
-    STATE : "state",
+    EFFECT : "effect",
     MESSAGE : "message"
 }
 
-const PLAYER_STATE = {
+const PLAYER_EFFECT = {
     RESTED: "rested"
 }
 
-module.exports = { TIMEOUT, TURNTIME, STATUS, ACTION_EVENTS, PLAYER_STATE }
+module.exports = { TIMEOUT, TURNTIME, STATUS, ACTION_EVENTS, PLAYER_EFFECT }

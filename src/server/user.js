@@ -11,7 +11,7 @@ class User{
     popularity;
     agility;
     golds;
-    states;
+    effects;
     room_id;
     socket_id;
   
@@ -19,6 +19,7 @@ class User{
       this.id = id;
       this.name = name;
       this.status = cst.STATUS.UNKNOWN;
+      this.effects = [];
     }
   
     synchronize_player(player){
@@ -26,7 +27,7 @@ class User{
       this.popularity = player.popularity;
       this.agility = player.agility;
       this.golds = player.golds;
-      this.states = player.states;
+      this.effects = player.effects;
     }
   
     update_name(name){

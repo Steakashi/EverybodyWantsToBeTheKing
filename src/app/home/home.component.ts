@@ -19,13 +19,12 @@ export class HomeComponent {
     else { this.join_room(form.value.user_name, form.value.room_id);  }
   }
 
-  create_room(userName, roomName) {
-    this.lobby.emit_room_order_creation(userName, roomName);
+  create_room(user_name, room_name) {
+    this.lobby.emit_room_order_creation(user_name, room_name);
   }
 
-  join_room(userName, roomID){
-    this.lobby.navigate_to_lobby(userName, roomID);
-
+  join_room(user_name, room_id){
+    this.lobby.navigate_to_lobby(user_name, room_id);
   }
 
   get_room(){

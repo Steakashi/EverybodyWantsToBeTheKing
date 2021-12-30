@@ -22,7 +22,7 @@ export class GameComponent implements OnInit {
   timer: any;
 
   ngOnInit(): void {
-    this.game.initialize(this.lobby.user);
+    this.game.initialize();
     this.game.begin_turn()
   }
 
@@ -34,8 +34,8 @@ export class GameComponent implements OnInit {
     });
   }
 
-  _get_player_data(){
-    return this.game.get_player();
+  _get_user_data(){
+    return this.game.get_user();
   }
 
   get_actions(){
@@ -46,24 +46,24 @@ export class GameComponent implements OnInit {
     return this.game.events()
   }
 
-  get_player_name(){
-    return this._get_player_data().user.name;
+  get_user_name(){
+    return this._get_user_data().name;
   }
 
-  get_player_life(){
-    return this._get_player_data().life;
+  get_user_life(){
+    return this._get_user_data().life;
   }
 
-  get_player_popularity(){
-    return this._get_player_data().popularity;
+  get_user_popularity(){
+    return this._get_user_data().popularity;
   }
 
-  get_player_golds(){
-    return this._get_player_data().golds;
+  get_user_golds(){
+    return this._get_user_data().golds;
   }
 
-  get_player_states(){
-    return this._get_player_data().states;
+  get_user_effects(){
+    return this._get_user_data().effects;
   }
 
   get_room_users() {

@@ -78,7 +78,7 @@ export class AppComponent implements OnInit{
     },
     {
       event_name: 'players_update',
-      callback: this.game.update_players.bind(this.game),
+      callback: this.game.update_users.bind(this.game),
       args: ['players'],
       log: 'Players has been updated from server'
     },
