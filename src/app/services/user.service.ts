@@ -9,6 +9,7 @@ export class User {
   room_id: string;
   status: string;
   life: number;
+  max_life: number;
   popularity: number;
   agility: number;
   golds: number;
@@ -19,6 +20,7 @@ export class User {
 
   reset_stats(){
     this.life = 3;
+    this.max_life = 3;
     this.popularity = 0;
     this.agility = 50;
     this.golds = 100;

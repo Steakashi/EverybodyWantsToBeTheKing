@@ -10,6 +10,9 @@ import { User } from './user.service';
 import { Room } from './room.service';
 
 
+import * as cst from './constants';
+
+
 const PENDING = 'PENDING';
 const PROCESSING = 'PROCESSING';
 const CONNECTED = 'CONNECTED';
@@ -56,6 +59,10 @@ export class LobbyService{
     if (this.room) return this.room.name;
   }
 
+  get_default_name(){
+    return cst.DEFAULT_NAMES[Math.floor(Math.random()*cst.DEFAULT_NAMES.length)];
+  }
+
   connection_is_allowed(){
     if (this.state === BLOCKED){ return false; }
     else {
@@ -98,6 +105,7 @@ export class LobbyService{
 
   emit_room_order_creation(user_name, room_name) {
     if (!this.connection_is_allowed()){ return; }
+    if (user_name.trim() === '') user_name = this.get_default_name();
     this.wsService.emit(
       'room_creation',
       {
@@ -115,7 +123,7 @@ export class LobbyService{
       'room_connection',
       {
         user_id: this.user.id,
-        user_name: this.user.name !== undefined ? this.user.name : 'randomName',
+        user_name: this.user.name !== undefined ? this.user.name : this.get_default_name(),
         room_id: this.room.id,
       }
     );
