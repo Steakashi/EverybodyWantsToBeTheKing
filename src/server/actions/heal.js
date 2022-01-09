@@ -3,6 +3,9 @@ const cst = require("../constants");
 const { AbstractAction } = require("./abstract-action");
 
 
+HEAL_VALUE = 2;
+
+
 class Heal extends AbstractAction{
 
     constructor(name, duration) {
@@ -10,15 +13,16 @@ class Heal extends AbstractAction{
     }
 
     process(){
-        this.emitter.life += 2;
+        var heal_value = this.emitter.max_life - this.emitter.life;
+        if (heal_value > HEAL_VALUE) heal_value = HEAL_VALUE;
         this.emitter.effects.push(
             this.initialize_effect(cst.PLAYER_EFFECT.RESTED, 1)
         );
         return {
             'emitter': this.emitter.id,
             'effect': cst.ACTION_EVENTS.SUCCESS,
-            'custom_message': "You recovered 2 life points !",
-            'public_message' : this.emitter.name + " has recovered 2 life points."
+            'custom_message': "You recovered " + heal_value + " life point(s) !",
+            'public_message' : this.emitter.name + " has recovered " + heal_value + " life point(s)."
         };
     }
 

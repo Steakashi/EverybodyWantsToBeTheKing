@@ -8,6 +8,7 @@ class User{
     name;
     status;
     life;
+    max_life;
     popularity;
     agility;
     golds;
@@ -24,6 +25,7 @@ class User{
   
     synchronize_player(player){
       this.life = player.life;
+      this.max_life = player.life;
       this.popularity = player.popularity;
       this.agility = player.agility;
       this.golds = player.golds;
